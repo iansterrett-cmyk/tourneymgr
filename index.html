@@ -161,17 +161,17 @@
 
     button, .button {
       display: inline-block;
-      padding: 0.65rem 1rem;
+      padding: 0.5rem 0.85rem;
       border-radius: 6px;
       border: 1px solid var(--border);
       background: var(--card-bg);
       color: var(--text);
       cursor: pointer;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 500;
       text-align: center;
       transition: background 0.2s;
-      min-height: 44px;
+      min-height: 38px;
     }
 
     button:hover, .button:hover {
@@ -185,6 +185,12 @@
 
     button.primary:hover, .button.primary:hover {
       background: var(--primary-hover);
+    }
+
+    button.btn-sm {
+      min-height: 32px;
+      padding: 0.25rem 0.6rem;
+      font-size: 0.85rem;
     }
 
     button:disabled {
@@ -243,11 +249,11 @@
     }
 
     .score-input {
-      width: 55px !important;
+      width: 50px !important;
       margin-bottom: 0 !important;
       text-align: center;
-      padding: 0.4rem !important;
-      font-size: 1rem;
+      padding: 0.3rem !important;
+      font-size: 0.95rem;
     }
 
     .game-row {
@@ -258,7 +264,7 @@
       border-bottom: 1px solid var(--border);
     }
 
-    @media (min-width: 480px) {
+    @media (min-width: 520px) {
       .game-row {
         flex-direction: row;
         align-items: center;
@@ -306,15 +312,11 @@
         <h1 style="font-size: 1.25rem;">Tournament Manager</h1>
         <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Navigation">☰</button>
       </div>
-      <nav id="nav">
-        <!-- Navigation rendering dynamically -->
-      </nav>
+      <nav id="nav"></nav>
     </div>
   </header>
 
-  <main id="view">
-    <!-- Active view content rendering dynamically -->
-  </main>
+  <main id="view"></main>
 
   <script>
     const DEFAULT_JSON_PATH = "./tournament_data.json";
@@ -323,7 +325,9 @@
     let currentView = "home";
     let menuOpen = false;
 
-    const $ = (selector) => document.querySelector(selector);
+    function $(selector) {
+      return document.querySelector(selector);
+    }
 
     function esc(str) {
       if (!str) return "";
@@ -347,7 +351,7 @@
       try {
         const res = await fetch(DEFAULT_JSON_PATH);
         if (!res.ok) {
-          throw new Error(`HTTP ${res.status}: Could not locate file at ${DEFAULT_JSON_PATH}`);
+          throw new Error("Could not locate default JSON");
         }
         data = await res.json();
         save();
@@ -425,31 +429,46 @@
       else nav.classList.remove("open");
     }
 
+    function saveScore(gameId) {
+      const homeVal = $(`#home-score-${gameId}`).value.trim();
+      const awayVal = $(`#away-score-${gameId}`).value.trim();
+      
+      const game = data.games.find(function(g) { return g.id === gameId; });
+      if (game) {
+        game.homeScore = homeVal !== "" && !isNaN(homeVal) ? parseInt(homeVal, 10) : null;
+        game.awayScore = awayVal !== "" && !isNaN(awayVal) ? parseInt(awayVal, 10) : null;
+        save();
+      }
+    }
+
+    function clearScore(gameId) {
+      const game = data.games.find(function(g) { return g.id === gameId; });
+      if (game) {
+        game.homeScore = null;
+        game.awayScore = null;
+        save();
+      }
+    }
+
     function renderHome() {
       if (!data) {
         $("#view").innerHTML = `
           <div class="card">
             <h2>Create or load a tournament</h2>
-            <p class="muted">
-              Manage a complete round-robin tournament and four-team finals bracket in your browser.
-            </p>
+            <p class="muted">Manage a round-robin tournament in your browser.</p>
             <div class="actions">
               <button class="primary" onclick="showCreate()">New tournament</button>
               <label class="button">
                 Import JSON
-                <input
-                  type="file"
-                  accept=".json,application/json"
-                  onchange="importJSON(event)"
-                  hidden>
+                <input type="file" accept=".json,application/json" onchange="importJSON(event)" hidden>
               </label>
-              <button onclick="resetToDefaultJSON()">Reload from ${DEFAULT_JSON_PATH}</button>
+              <button onclick="resetToDefaultJSON()">Reload JSON</button>
             </div>
           </div>`;
         return;
       }
 
-      const completed = data.games ? data.games.filter(g => g.homeScore !== null).length : 0;
+      const completed = data.games ? data.games.filter(function(g) { return g.homeScore !== null && g.awayScore !== null; }).length : 0;
       const totalGames = data.games ? data.games.length : 0;
       const isComplete = allRRComplete();
 
@@ -459,30 +478,20 @@
             <h2>${esc(data.name)}</h2>
             <p>${data.teams ? data.teams.length : 0} teams · ${totalGames} games</p>
             <p>${completed}/${totalGames} round-robin games completed.</p>
-
             <div class="actions">
               <button class="primary" onclick="go('schedule')">Enter scores</button>
               <button onclick="go('standings')">View standings</button>
               <button onclick="showCreate()">New tournament</button>
             </div>
           </div>
-
           <div class="card">
             <h3>Round-robin stage</h3>
-            <p>${data.roundRobinComplete ? "Completed" : "In progress"}</p>
+            <p>${data.roundRobinComplete ? "Status: <strong>Completed</strong>" : "Status: <strong>In progress</strong>"}</p>
             <div class="actions">
-              <button
-                class="primary"
-                onclick="completeRR()"
-                ${data.roundRobinComplete || !isComplete ? "disabled" : ""}>
+              <button class="primary" onclick="completeRR()" ${data.roundRobinComplete || !isComplete ? "disabled" : ""}>
                 Mark round robin complete
               </button>
             </div>
-            ${
-              !isComplete
-                ? `<p class="muted" style="margin-top:0.5rem;"><small>Complete every scheduled game before closing this stage.</small></p>`
-                : ""
-            }
           </div>
         </div>`;
     }
@@ -493,22 +502,19 @@
           <h2>Create New Tournament</h2>
           <label style="display:block; margin-bottom:0.25rem; font-weight:500;">Tournament Name</label>
           <input type="text" id="t-name" placeholder="e.g. Summer Championship">
-          
           <label style="display:block; margin-bottom:0.25rem; font-weight:500;">Team Names (one per line)</label>
           <textarea id="t-teams" style="height:120px; margin-bottom:1rem;"></textarea>
-
           <div class="actions">
             <button class="primary" onclick="createTournament()">Create</button>
             <button onclick="render()">Cancel</button>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
     function createTournament() {
       const name = $("#t-name").value.trim() || "Untitled Tournament";
       const teamsText = $("#t-teams").value.trim();
-      const teams = teamsText.split("\n").map(t => t.trim()).filter(Boolean);
+      const teams = teamsText.split("\n").map(function(t) { return t.trim(); }).filter(Boolean);
 
       if (teams.length < 2) {
         alert("Please enter at least 2 teams.");
@@ -529,20 +535,14 @@
         }
       }
 
-      data = {
-        name,
-        teams,
-        games,
-        roundRobinComplete: false
-      };
-
+      data = { name, teams, games, roundRobinComplete: false };
       save();
-      go("home");
+      go("schedule");
     }
 
     function allRRComplete() {
-      if (!data || !data.games) return false;
-      return data.games.every(g => g.homeScore !== null && g.awayScore !== null);
+      if (!data || !data.games || data.games.length === 0) return false;
+      return data.games.every(function(g) { return g.homeScore !== null && g.awayScore !== null; });
     }
 
     function completeRR() {
@@ -551,20 +551,9 @@
       save();
     }
 
-    function updateScore(gameId, homeScore, awayScore) {
-      if (!data || !data.games) return;
-      const game = data.games.find(g => g.id === gameId);
-      if (game) {
-        game.homeScore = homeScore !== "" && !isNaN(homeScore) ? parseInt(homeScore, 10) : null;
-        game.awayScore = awayScore !== "" && !isNaN(awayScore) ? parseInt(awayScore, 10) : null;
-        save();
-      }
-    }
-
     function generateRounds(teamsList) {
-      const list = [...teamsList];
-      const isOdd = list.length % 2 !== 0;
-      if (isOdd) list.push("BYE");
+      const list = teamsList.slice();
+      if (list.length % 2 !== 0) list.push("BYE");
 
       const n = list.length;
       const totalRounds = n - 1;
@@ -576,13 +565,9 @@
           const home = list[i];
           const away = list[n - 1 - i];
 
-          if (home === "BYE") {
-            roundData.byeTeam = away;
-          } else if (away === "BYE") {
-            roundData.byeTeam = home;
-          } else {
-            roundData.matches.push({ home, away });
-          }
+          if (home === "BYE") roundData.byeTeam = away;
+          else if (away === "BYE") roundData.byeTeam = home;
+          else roundData.matches.push({ home: home, away: away });
         }
         rounds.push(roundData);
         list.splice(1, 0, list.pop());
@@ -595,7 +580,7 @@
         $("#view").innerHTML = `
           <div class="card">
             <h2>Schedule</h2>
-            <p class="muted">No tournament data available. Please create or import a tournament first.</p>
+            <p class="muted">No tournament data available.</p>
             <div class="actions">
               <button class="primary" onclick="showCreate()">New Tournament</button>
             </div>
@@ -604,30 +589,30 @@
       }
 
       const generatedRounds = generateRounds(data.teams);
-      let html = `<div class="card"><h2>Schedule</h2>`;
+      let html = '<div class="card"><h2>Schedule</h2>';
 
-      generatedRounds.forEach(r => {
-        html += `
-          <div class="round-header">
-            <h3>Round ${r.roundNumber}</h3>
-            ${r.byeTeam ? `<span class="bye-badge">Bye: <strong>${esc(r.byeTeam)}</strong></span>` : ''}
-          </div>
-        `;
+      generatedRounds.forEach(function(r) {
+        const byeHtml = r.byeTeam ? '<span class="bye-badge">Bye: <strong>' + esc(r.byeTeam) + '</strong></span>' : '';
+        html += '<div class="round-header"><h3>Round ' + r.roundNumber + '</h3>' + byeHtml + '</div>';
 
-        r.matches.forEach(m => {
-          const game = data.games.find(g => 
-            (g.home === m.home && g.away === m.away) || 
-            (g.home === m.away && g.away === m.home)
-          );
+        r.matches.forEach(function(m) {
+          const game = data.games.find(function(g) {
+            return (g.home === m.home && g.away === m.away) || (g.home === m.away && g.away === m.home);
+          });
 
           if (game) {
+            const hVal = game.homeScore !== null ? game.homeScore : '';
+            const aVal = game.awayScore !== null ? game.awayScore : '';
+            
             html += `
               <div class="game-row">
                 <span style="font-weight: 500;">${esc(game.home)} vs ${esc(game.away)}</span>
                 <div class="score-controls">
-                  <input type="number" class="score-input" value="${game.homeScore ?? ''}" onchange="updateScore(${game.id}, this.value, this.nextElementSibling.value)">
-                  <span>-</span>
-                  <input type="number" class="score-input" value="${game.awayScore ?? ''}" onchange="updateScore(${game.id}, this.previousElementSibling.value, this.value)">
+                  <input type="number" id="home-score-${game.id}" class="score-input" value="${hVal}" placeholder="-">
+                  <span>:</span>
+                  <input type="number" id="away-score-${game.id}" class="score-input" value="${aVal}" placeholder="-">
+                  <button class="primary btn-sm" onclick="saveScore(${game.id})">Save</button>
+                  ${(hVal !== '' || aVal !== '') ? `<button class="btn-sm" onclick="clearScore(${game.id})">Reset</button>` : ''}
                 </div>
               </div>
             `;
@@ -635,7 +620,7 @@
         });
       });
 
-      html += `</div>`;
+      html += '</div>';
       $("#view").innerHTML = html;
     }
 
@@ -644,20 +629,17 @@
         $("#view").innerHTML = `
           <div class="card">
             <h2>Standings</h2>
-            <p class="muted">No tournament data loaded yet. Please create or import a tournament.</p>
-            <div class="actions">
-              <button class="primary" onclick="showCreate()">New Tournament</button>
-            </div>
+            <p class="muted">No tournament data loaded yet.</p>
           </div>`;
         return;
       }
 
       const stats = {};
-      data.teams.forEach(t => {
+      data.teams.forEach(function(t) {
         stats[t] = { played: 0, wins: 0, losses: 0, ties: 0, points: 0 };
       });
 
-      data.games.forEach(g => {
+      data.games.forEach(function(g) {
         if (g.homeScore !== null && g.awayScore !== null) {
           if (stats[g.home]) stats[g.home].played++;
           if (stats[g.away]) stats[g.away].played++;
@@ -675,7 +657,7 @@
         }
       });
 
-      const sorted = Object.keys(stats).sort((a, b) => stats[b].points - stats[a].points);
+      const sorted = Object.keys(stats).sort(function(a, b) { return stats[b].points - stats[a].points; });
 
       let html = `
         <div class="card">
@@ -694,7 +676,7 @@
               </thead>
               <tbody>`;
 
-      sorted.forEach(team => {
+      sorted.forEach(function(team) {
         const s = stats[team];
         html += `
           <tr>
@@ -707,7 +689,7 @@
           </tr>`;
       });
 
-      html += `</tbody></table></div></div>`;
+      html += '</tbody></table></div></div>';
       $("#view").innerHTML = html;
     }
 
@@ -722,7 +704,7 @@
               Import JSON
               <input type="file" accept=".json,application/json" onchange="importJSON(event)" hidden>
             </label>
-            <button onclick="resetToDefaultJSON()">Reset to ${DEFAULT_JSON_PATH}</button>
+            <button onclick="resetToDefaultJSON()">Reset JSON</button>
           </div>
         </div>
       `;
