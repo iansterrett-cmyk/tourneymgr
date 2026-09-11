@@ -1,898 +1,1621 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tournament Manager</title>
-  <style>
-    :root {
-      --bg: #0f172a;
-      --card-bg: #1e293b;
-      --border: #334155;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --danger: #ef4444;
-      --success: #22c55e;
-    }
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tournament Manager</title>
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+<style>
+:root{
+  --bg:#f5f6f8;
+  --card:#fff;
+  --ink:#17202a;
+  --muted:#68727d;
+  --line:#dfe3e8;
+  --accent:#2457d6;
+  --danger:#b42318;
+  --ok:#16794c;
+}
 
-    body {
-      font-family: system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      padding-bottom: 2rem;
-      -webkit-tap-highlight-color: transparent;
-    }
+*{box-sizing:border-box}
 
-    header {
-      background: var(--card-bg);
-      border-bottom: 1px solid var(--border);
-      padding: 0.75rem 1rem;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
 
-    .header-content {
-      max-width: 1000px;
-      margin: 0 auto;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-    }
+header{
+  background:#182230;
+  color:#fff;
+  padding:18px 24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
 
-    .brand {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      width: 100%;
-    }
+header h1{
+  margin:0;
+  font-size:20px;
+}
 
-    @media (min-width: 640px) {
-      .brand {
-        width: auto;
-      }
-    }
+main{
+  max-width:1200px;
+  margin:auto;
+  padding:22px;
+}
 
-    .menu-toggle {
-      display: block;
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--text);
-      padding: 0.4rem 0.75rem;
-      font-size: 1.25rem;
-      border-radius: 6px;
-    }
+nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-bottom:18px;
+}
 
-    @media (min-width: 640px) {
-      .menu-toggle {
-        display: none;
-      }
-    }
+button,
+.button{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:7px;
+  padding:9px 13px;
+  cursor:pointer;
+  font:inherit;
+}
 
-    nav {
-      display: none;
-      width: 100%;
-      flex-direction: column;
-      gap: 0.5rem;
-      margin-top: 0.75rem;
-    }
+button:hover,
+.button:hover{
+  border-color:var(--accent);
+}
 
-    nav.open {
-      display: flex;
-    }
+button.primary{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+}
 
-    @media (min-width: 640px) {
-      nav {
-        display: flex !important;
-        flex-direction: row;
-        width: auto;
-        margin-top: 0;
-        gap: 0.5rem;
-      }
-    }
+button.danger{
+  color:var(--danger);
+}
 
-    nav button {
-      background: transparent;
-      color: var(--text-muted);
-      border: 1px solid transparent;
-      width: 100%;
-      text-align: left;
-      padding: 0.6rem 0.75rem;
-    }
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
 
-    @media (min-width: 640px) {
-      nav button {
-        width: auto;
-        text-align: center;
-        padding: 0.5rem 1rem;
-      }
-    }
+nav button.active{
+  background:var(--ink);
+  color:#fff;
+}
 
-    nav button.active {
-      color: var(--text);
-      border-color: var(--border);
-      background: rgba(255, 255, 255, 0.05);
-    }
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:18px;
+  margin-bottom:18px;
+}
 
-    main {
-      max-width: 1000px;
-      margin: 1.5rem auto 0;
-      padding: 0 1rem;
-    }
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px;
+}
 
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 1.25rem;
-      margin-bottom: 1.25rem;
-    }
+label{
+  display:block;
+  font-weight:600;
+  margin-bottom:12px;
+}
 
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 1.25rem;
-    }
+input,
+select{
+  width:100%;
+  padding:9px;
+  border:1px solid #bdc5ce;
+  border-radius:6px;
+  font:inherit;
+  margin-top:5px;
+}
 
-    @media (min-width: 640px) {
-      .grid {
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      }
-    }
+input:disabled{
+  background:#eef0f3;
+  color:#5e6670;
+}
 
-    h1, h2, h3 {
-      margin-bottom: 0.5rem;
-    }
+h2,
+h3{
+  margin-top:0;
+}
 
-    p.muted {
-      color: var(--text-muted);
-      margin-bottom: 1rem;
-    }
+.muted{
+  color:var(--muted);
+}
 
-    button, .button {
-      display: inline-block;
-      padding: 0.5rem 0.85rem;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--card-bg);
-      color: var(--text);
-      cursor: pointer;
-      font-size: 0.9rem;
-      font-weight: 500;
-      text-align: center;
-      transition: background 0.2s;
-      min-height: 38px;
-    }
+.error{
+  color:var(--danger);
+}
 
-    button:hover, .button:hover {
-      background: rgba(255, 255, 255, 0.1);
-    }
+.success{
+  color:var(--ok);
+}
 
-    button.primary, .button.primary {
-      background: var(--primary);
-      border-color: var(--primary);
-    }
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
 
-    button.primary:hover, .button.primary:hover {
-      background: var(--primary-hover);
-    }
+.scroll{
+  overflow:auto;
+}
 
-    button.btn-sm {
-      min-height: 32px;
-      padding: 0.25rem 0.6rem;
-      font-size: 0.85rem;
-    }
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+}
 
-    button:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+th,
+td{
+  padding:9px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  white-space:nowrap;
+}
 
-    .actions {
-      display: flex;
-      gap: 0.5rem;
-      flex-direction: column;
-      margin-top: 1rem;
-    }
+th{
+  background:#f0f2f5;
+}
 
-    @media (min-width: 480px) {
-      .actions {
-        flex-direction: row;
-        flex-wrap: wrap;
-      }
-    }
+.center{
+  text-align:center;
+}
 
-    .table-container {
-      width: 100%;
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      margin-top: 1rem;
-    }
+.pill{
+  display:inline-block;
+  border-radius:99px;
+  padding:4px 9px;
+  background:#edf1f7;
+  font-size:12px;
+}
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      min-width: 320px;
-    }
+.game{
+  display:grid;
+  grid-template-columns:1fr 70px 20px 70px 1fr auto;
+  gap:8px;
+  align-items:center;
+  border-bottom:1px solid var(--line);
+  padding:10px 0;
+}
 
-    th, td {
-      padding: 0.75rem 0.5rem;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
+.game input{
+  margin:0;
+  text-align:center;
+}
 
-    th {
-      color: var(--text-muted);
-      font-size: 0.85rem;
-      text-transform: uppercase;
-    }
+.game .away{
+  text-align:right;
+}
 
-    input[type="text"], input[type="number"], textarea {
-      width: 100%;
-      padding: 0.65rem;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      color: var(--text);
-      font-size: 1rem;
-      margin-bottom: 1rem;
-    }
+.series{
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:14px;
+  margin:12px 0;
+}
 
-    .score-input {
-      width: 50px !important;
-      margin-bottom: 0 !important;
-      text-align: center;
-      padding: 0.3rem !important;
-      font-size: 0.95rem;
-    }
+.series h3{
+  margin-bottom:10px;
+}
 
-    .game-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      padding: 0.85rem 0;
-      border-bottom: 1px solid var(--border);
-    }
+.series small{
+  color:var(--muted);
+  font-weight:normal;
+}
 
-    @media (min-width: 520px) {
-      .game-row {
-        flex-direction: row;
-        align-items: center;
-        justify-content: space-between;
-      }
-    }
+.h2h-table th,
+.h2h-table td{
+  text-align:center;
+  min-width:92px;
+}
 
-    .score-controls {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      justify-content: flex-end;
-    }
+.h2h-table th:first-child,
+.h2h-table td:first-child{
+  text-align:left;
+  min-width:160px;
+  position:sticky;
+  left:0;
+  background:#fff;
+}
 
-    .round-header {
-      margin-top: 1.5rem;
-      margin-bottom: 0.75rem;
-      padding-bottom: 0.4rem;
-      border-bottom: 2px solid var(--primary);
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-    }
+.h2h-table th:first-child{
+  background:#f0f2f5;
+}
 
-    .round-header h3 {
-      margin-bottom: 0;
-      color: var(--text);
-    }
+.h2h-cell{
+  font-size:12px;
+  line-height:1.35;
+}
 
-    .bye-badge {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      background: rgba(255, 255, 255, 0.05);
-      padding: 0.2rem 0.6rem;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-    }
+.h2h-cell strong{
+  display:block;
+  font-size:13px;
+}
 
-    .bracket {
-      display: flex;
-      flex-direction: column;
-      gap: 1.5rem;
-      margin-top: 1rem;
-    }
+.h2h-cell span{
+  color:var(--muted);
+}
 
-    @media (min-width: 640px) {
-      .bracket {
-        flex-direction: row;
-        align-items: stretch;
-      }
-      .bracket-column {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-around;
-      }
-    }
+.tie-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:12px;
+}
 
-    .matchup {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 0.75rem;
-      margin-bottom: 1rem;
-    }
-  </style>
+.tie-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 10px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:600;
+  border:1px solid transparent;
+}
+
+small{
+  color:var(--muted);
+}
+
+.hidden{
+  display:none!important;
+}
+
+@media(max-width:650px){
+  main{
+    padding:12px;
+  }
+
+  .game{
+    grid-template-columns:1fr 52px 12px 52px auto;
+  }
+
+  .game > div:nth-child(5){
+    display:none;
+  }
+
+  .game > button{
+    grid-column:1 / -1;
+  }
+}
+</style>
 </head>
+
 <body>
+<header>
+  <h1 id="title">Tournament Manager</h1>
+  <div id="stage" class="pill">No tournament</div>
+</header>
 
-  <header>
-    <div class="header-content">
-      <div class="brand">
-        <h1 style="font-size: 1.25rem;">Tournament Manager</h1>
-        <button class="menu-toggle" onclick="toggleMenu()" aria-label="Toggle Navigation">☰</button>
+<main>
+  <nav id="nav"></nav>
+  <section id="view"></section>
+</main>
+
+<script>
+"use strict";
+
+const KEY="rr-tournament-v1";
+const DEFAULT_JSON_PATH="./tournament_data.json";
+
+let data=null;
+let undoStack=[];
+let currentView="home";
+
+const TIE_COLORS=[
+  { bg:"#eff6ff", border:"#bfdbfe", text:"#1e40af", badgeBg:"#dbeafe" }, // Blue
+  { bg:"#fefce8", border:"#fef08a", text:"#854d0e", badgeBg:"#fef9c3" }, // Amber
+  { bg:"#f0fdf4", border:"#bbf7d0", text:"#166534", badgeBg:"#dcfce7" }, // Green
+  { bg:"#faf5ff", border:"#e9d5ff", text:"#6b21a8", badgeBg:"#f3e8ff" }, // Purple
+  { bg:"#fff1f2", border:"#fecdd3", text:"#9f1239", badgeBg:"#ffe4e6" }  // Rose
+];
+
+const $=selector=>document.querySelector(selector);
+
+const esc=value=>String(value ?? "").replace(/[&<>"']/g,char=>({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
+}[char]));
+
+const uid=()=>{
+  return Math.random().toString(36).slice(2)+Date.now().toString(36);
+};
+
+function save(){
+  if(data){
+    localStorage.setItem(KEY,JSON.stringify(data));
+  }
+}
+
+function snapshot(){
+  if(!data)return;
+
+  undoStack.push(JSON.stringify(data));
+
+  if(undoStack.length>50){
+    undoStack.shift();
+  }
+}
+
+function undo(){
+  if(!undoStack.length){
+    alert("Nothing to undo.");
+    return;
+  }
+
+  data=JSON.parse(undoStack.pop());
+  save();
+  render();
+}
+
+function touch(){
+  if(data){
+    data.meta = data.meta || {};
+    data.meta.updated=new Date().toISOString();
+  }
+}
+
+function commit(){
+  touch();
+  save();
+  render();
+}
+
+function teamName(index){
+  return data.teams[index]?.name || "Unknown";
+}
+
+function newData(name,names){
+  return {
+    meta:{
+      schema:1,
+      created:new Date().toISOString(),
+      updated:new Date().toISOString()
+    },
+    id:uid(),
+    name,
+    stage:"roundrobin",
+    roundRobinComplete:false,
+    teams:names.map(name=>({
+      id:uid(),
+      name:name.trim(),
+      order:0
+    })),
+    games:makeSchedule(names.length),
+    finals:null
+  };
+}
+
+function makeSchedule(n){
+  const teams=[...Array(n).keys()];
+
+  if(n%2){
+    teams.push(null);
+  }
+
+  const rounds=[];
+  const roundCount=teams.length-1;
+  const half=teams.length/2;
+
+  for(let round=0;round<roundCount;round++){
+    const games=[];
+
+    for(let i=0;i<half;i++){
+      let home=teams[i];
+      let away=teams[teams.length-1-i];
+
+      if(home===null || away===null){
+        continue;
+      }
+
+      if((round+i)%2){
+        [home,away]=[away,home];
+      }
+
+      games.push({
+        id:uid(),
+        round:round+1,
+        home,
+        away,
+        homeScore:null,
+        awayScore:null
+      });
+    }
+
+    rounds.push(games);
+
+    teams.splice(1,0,teams.pop());
+  }
+
+  return rounds.flat();
+}
+
+function allRRComplete(){
+  return data && data.games && data.games.every(game=>
+    game.homeScore!==null &&
+    game.awayScore!==null
+  );
+}
+
+function standings(){
+  if(!data || !data.teams) return [];
+
+  const rows=data.teams.map((team,index)=>({
+    i:index,
+    id:team.id,
+    name:team.name,
+    gp:0,
+    w:0,
+    l:0,
+    pf:0,
+    pa:0,
+    pm:0,
+    order:team.order ?? index
+  }));
+
+  for(const game of (data.games || [])){
+    if(game.homeScore===null || game.awayScore===null){
+      continue;
+    }
+
+    const home=rows[game.home];
+    const away=rows[game.away];
+    if(!home || !away) continue;
+
+    const hs=Number(game.homeScore);
+    const as=Number(game.awayScore);
+
+    home.gp++;
+    away.gp++;
+
+    home.pf+=hs;
+    home.pa+=as;
+
+    away.pf+=as;
+    away.pa+=hs;
+
+    if(hs>as){
+      home.w++;
+      away.l++;
+    }else{
+      away.w++;
+      home.l++;
+    }
+  }
+
+  rows.forEach(row=>{
+    row.pm=row.pf-row.pa;
+  });
+
+  // Step 1: Initial sort by Overall Wins
+  rows.sort((a,b)=> b.w - a.w || a.order - b.order);
+
+  let result=[];
+
+  for(let i=0; i<rows.length; ){
+    let j=i+1;
+
+    // Group teams with identical overall wins
+    while(j<rows.length && rows[j].w === rows[i].w){
+      j++;
+    }
+
+    const group=rows.slice(i,j);
+
+    if(group.length > 1){
+      const groupIds = new Set(group.map(row => row.i));
+
+      // Calculate Head-to-Head stats ONLY among group members
+      group.forEach(row => {
+        row.hhW = 0;
+        row.hhL = 0;
+        row.hhPM = 0;
+
+        for(const game of data.games){
+          if(
+            game.homeScore === null ||
+            game.awayScore === null ||
+            !groupIds.has(game.home) ||
+            !groupIds.has(game.away)
+          ){
+            continue;
+          }
+
+          const hs = Number(game.homeScore);
+          const as = Number(game.awayScore);
+
+          if(game.home === row.i){
+            row.hhPM += hs - as;
+            if(hs > as) row.hhW++;
+            else row.hhL++;
+          } else if(game.away === row.i){
+            row.hhPM += as - hs;
+            if(as > hs) row.hhW++;
+            else row.hhL++;
+          }
+        }
+      });
+
+      // Tiebreaker Hierarchy:
+      group.sort((a,b) =>
+        (b.hhW - b.hhL) - (a.hhW - a.hhL) ||
+        b.hhPM - a.hhPM ||
+        b.pm - a.pm ||
+        a.order - b.order
+      );
+    }
+
+    result.push(...group);
+    i=j;
+  }
+
+  return result;
+}
+
+function getTiedGroups(teams){
+  const groups=[];
+  let colorIndex=0;
+
+  for(let i=0;i<teams.length;){
+    let j=i+1;
+
+    while(j<teams.length && teams[j].w===teams[i].w){
+      j++;
+    }
+
+    if(j-i>1){
+      const groupTeams=teams.slice(i,j);
+      const palette=TIE_COLORS[colorIndex % TIE_COLORS.length];
+
+      groups.push({
+        wins:teams[i].w,
+        teamIndices:groupTeams.map(t=>t.i),
+        teamNames:groupTeams.map(t=>t.name),
+        style:palette
+      });
+
+      colorIndex++;
+    }
+
+    i=j;
+  }
+
+  return groups;
+}
+
+function headToHead(homeIndex,awayIndex){
+  let homeW=0;
+  let awayW=0;
+  let differential=0;
+
+  for(const game of (data.games || [])){
+    if(
+      game.homeScore===null ||
+      game.awayScore===null
+    ){
+      continue;
+    }
+
+    const hs=Number(game.homeScore);
+    const as=Number(game.awayScore);
+
+    if(game.home===homeIndex && game.away===awayIndex){
+      differential+=hs-as;
+
+      if(hs>as)homeW++;
+      else awayW++;
+    }
+
+    if(game.home===awayIndex && game.away===homeIndex){
+      differential+=as-hs;
+
+      if(as>hs)homeW++;
+      else awayW++;
+    }
+  }
+
+  return {
+    homeW,
+    awayW,
+    differential
+  };
+}
+
+function render(){
+  $("#title").textContent=data ? data.name : "Tournament Manager";
+
+  $("#stage").textContent=data
+    ? data.roundRobinComplete ? "Finals stage" : "Round-robin stage"
+    : "No tournament";
+
+  nav();
+
+  if(!data){
+    renderHome();
+    return;
+  }
+
+  const views={
+    home:renderHome,
+    setup:renderSetup,
+    schedule:renderSchedule,
+    standings:renderStandings,
+    finals:renderFinals,
+    data:renderData
+  };
+
+  (views[currentView] || renderHome)();
+}
+
+function nav(){
+  if(!data){
+    $("#nav").innerHTML="";
+    return;
+  }
+
+  const links=[
+    ["home","Overview"],
+    ["setup","Teams"],
+    ["schedule","Schedule"],
+    ["standings","Standings"],
+    ["finals","Finals"],
+    ["data","Import / Export"]
+  ];
+
+  $("#nav").innerHTML=
+    links.map(([view,label])=>
+      `<button class="${currentView===view?"active":""}"
+        onclick="go('${view}')">${label}</button>`
+    ).join("")+
+    `<button onclick="undo()" ${undoStack.length?"":"disabled"}>Undo</button>
+     <button onclick="startNewTournament()">New tournament</button>
+     <button class="danger" onclick="deleteTournament()">Delete</button>`;
+}
+
+function go(view){
+  currentView=view;
+  render();
+}
+
+function startNewTournament(){
+  if(confirm(
+    "Start a new tournament? The current tournament will remain saved in this browser."
+  )){
+    showCreate();
+  }
+}
+
+function renderHome(){
+  if(!data){
+    $("#view").innerHTML=`
+      <div class="card">
+        <h2>Create or load a tournament</h2>
+        <p class="muted">
+          Manage a complete round-robin tournament and four-team finals bracket in your browser.
+        </p>
+        <button class="primary" onclick="showCreate()">New tournament</button>
+        <button onclick="go('data')">Import JSON</button>
+        <button onclick="loadDefaultJSON()">Load tournament_data.json</button>
+      </div>`;
+    return;
+  }
+
+  const completed=(data.games || []).filter(game=>
+    game.homeScore!==null
+  ).length;
+
+  $("#view").innerHTML=`
+    <div class="grid">
+      <div class="card">
+        <h2>${esc(data.name)}</h2>
+        <p>${data.teams ? data.teams.length : 0} teams · ${data.games ? data.games.length : 0} games</p>
+        <p>${completed}/${data.games ? data.games.length : 0} round-robin games completed.</p>
+
+        <div class="actions">
+          <button class="primary" onclick="go('schedule')">
+            Enter scores
+          </button>
+          <button onclick="go('standings')">
+            View standings
+          </button>
+          <button onclick="startNewTournament()">
+            New tournament
+          </button>
+        </div>
       </div>
-      <nav id="nav"></nav>
-    </div>
-  </header>
 
-  <main id="view"></main>
+      <div class="card">
+        <h3>Round-robin stage</h3>
+        <p>${data.roundRobinComplete?"Completed":"In progress"}</p>
 
-  <script>
-    const DEFAULT_JSON_PATH = "./tournament_data.json";
+        <button
+          class="primary"
+          onclick="completeRR()"
+          ${data.roundRobinComplete || !allRRComplete()?"disabled":""}>
+          Mark round robin complete
+        </button>
 
-    let data = null;
-    let currentView = "home";
-    let menuOpen = false;
-
-    function $(selector) {
-      return document.querySelector(selector);
-    }
-
-    function esc(str) {
-      if (!str) return "";
-      return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;");
-    }
-
-    function toggleMenu() {
-      menuOpen = !menuOpen;
-      const nav = $("#nav");
-      if (nav) {
-        if (menuOpen) nav.classList.add("open");
-        else nav.classList.remove("open");
-      }
-    }
-
-    async function loadFromDefaultJSON() {
-      try {
-        const res = await fetch(DEFAULT_JSON_PATH);
-        if (!res.ok) {
-          throw new Error("Could not locate default JSON");
+        ${
+          !allRRComplete()
+            ? `<br><small>Complete every scheduled game before closing this stage.</small>`
+            : ""
         }
-        data = await res.json();
-        save();
-      } catch (err) {
-        console.error("Failed to load default JSON file:", err);
-      }
-    }
+      </div>
+    </div>`;
+}
 
-    function loadFromLocalStorage() {
-      const stored = localStorage.getItem("tournament_data");
-      if (stored) {
-        try {
-          data = JSON.parse(stored);
-        } catch (e) {
-          console.error("Error parsing localStorage data:", e);
+function showCreate(){
+  $("#view").innerHTML=`
+    <div class="card">
+      <h2>New tournament</h2>
+
+      <form onsubmit="create(event)">
+        <label>
+          Tournament name
+          <input id="tn" required maxlength="100">
+        </label>
+
+        <label>
+          Number of teams
+          <select id="tc" onchange="teamInputs()">
+            ${Array.from({length:29},(_,i)=>
+              `<option>${i+4}</option>`
+            ).join("")}
+          </select>
+        </label>
+
+        <div id="teamInputs"></div>
+
+        <button class="primary">Create tournament</button>
+        ${
+          data
+            ? `<button type="button" onclick="render()">Cancel</button>`
+            : ""
         }
-      }
-    }
+      </form>
+    </div>`;
 
-    function save() {
-      if (data) {
-        localStorage.setItem("tournament_data", JSON.stringify(data));
-      } else {
-        localStorage.removeItem("tournament_data");
-      }
-      render();
-    }
+  teamInputs();
+}
 
-    async function init() {
-      loadFromLocalStorage();
-      if (!data) {
-        await loadFromDefaultJSON();
-      }
-      render();
-    }
+function teamInputs(){
+  const count=Number($("#tc").value);
 
-    async function resetToDefaultJSON() {
-      await loadFromDefaultJSON();
-      render();
-    }
+  $("#teamInputs").innerHTML=
+    Array.from({length:count},(_,i)=>`
+      <label>
+        Team ${i+1}
+        <input
+          class="teamInput"
+          required
+          maxlength="60"
+          value="Team ${i+1}">
+      </label>
+    `).join("");
+}
 
-    function importJSON(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+function create(event){
+  event.preventDefault();
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          data = JSON.parse(e.target.result);
-          save();
-          go("home");
-        } catch (err) {
-          alert("Invalid JSON file selected.");
-        }
-      };
-      reader.readAsText(file);
-    }
+  const names=[
+    ...document.querySelectorAll(".teamInput")
+  ].map(input=>input.value.trim());
 
-    function go(view) {
-      currentView = view;
-      menuOpen = false;
-      render();
-    }
+  const normalized=names.map(name=>name.toLowerCase());
 
-    function renderNav() {
-      const nav = $("#nav");
-      nav.innerHTML = `
-        <button class="${currentView === 'home' ? 'active' : ''}" onclick="go('home')">Home</button>
-        <button class="${currentView === 'schedule' ? 'active' : ''}" onclick="go('schedule')">Schedule</button>
-        <button class="${currentView === 'standings' ? 'active' : ''}" onclick="go('standings')">Standings</button>
-        <button class="${currentView === 'finals' ? 'active' : ''}" onclick="go('finals')">Finals</button>
-        <button class="${currentView === 'data' ? 'active' : ''}" onclick="go('data')">Data / Import</button>
-      `;
+  if(new Set(normalized).size!==names.length){
+    alert("Team names must be unique.");
+    return;
+  }
 
-      if (menuOpen) nav.classList.add("open");
-      else nav.classList.remove("open");
-    }
+  if(data){
+    snapshot();
+  }
 
-    function saveScore(gameId) {
-      const homeVal = $(`#home-score-${gameId}`).value.trim();
-      const awayVal = $(`#away-score-${gameId}`).value.trim();
-      
-      const game = data.games.find(function(g) { return g.id === gameId; });
-      if (game) {
-        game.homeScore = homeVal !== "" && !isNaN(homeVal) ? parseInt(homeVal, 10) : null;
-        game.awayScore = awayVal !== "" && !isNaN(awayVal) ? parseInt(awayVal, 10) : null;
-        save();
-      }
-    }
+  data=newData($("#tn").value.trim(),names);
+  currentView="home";
+  commit();
+}
 
-    function clearScore(gameId) {
-      const game = data.games.find(function(g) { return g.id === gameId; });
-      if (game) {
-        game.homeScore = null;
-        game.awayScore = null;
-        save();
-      }
-    }
+function renderSetup(){
+  $("#view").innerHTML=`
+    <div class="card">
+      <h2>Teams</h2>
+      <p class="muted">
+        Teams cannot be added or removed after the schedule is created.
+      </p>
 
-    function saveFinalsScore(matchKey) {
-      if (!data.finals) return;
-      const homeVal = $(`#final-home-${matchKey}`).value.trim();
-      const awayVal = $(`#final-away-${matchKey}`).value.trim();
+      ${data.teams.map((team,index)=>`
+        <label>
+          Team ${index+1}
+          <input
+            id="team${index}"
+            value="${esc(team.name)}"
+            maxlength="60">
+        </label>
+      `).join("")}
 
-      const match = data.finals[matchKey];
-      if (match) {
-        match.homeScore = homeVal !== "" && !isNaN(homeVal) ? parseInt(homeVal, 10) : null;
-        match.awayScore = awayVal !== "" && !isNaN(awayVal) ? parseInt(awayVal, 10) : null;
+      <button class="primary" onclick="saveTeams()">
+        Save names
+      </button>
+    </div>`;
+}
 
-        // Auto advance to championship if semifinals complete
-        if (matchKey === "semi1" || matchKey === "semi2") {
-          updateChampionshipMatchup();
-        }
+function saveTeams(){
+  const names=data.teams.map((team,index)=>
+    $("#team"+index).value.trim()
+  );
 
-        save();
-      }
-    }
+  if(
+    names.some(name=>!name) ||
+    new Set(names.map(name=>name.toLowerCase())).size!==names.length
+  ){
+    alert("Team names must be present and unique.");
+    return;
+  }
 
-    function updateChampionshipMatchup() {
-      if (!data.finals || !data.finals.semi1 || !data.finals.semi2) return;
-      
-      let winner1 = null;
-      let winner2 = null;
+  snapshot();
 
-      if (data.finals.semi1.homeScore !== null && data.finals.semi1.awayScore !== null) {
-        winner1 = data.finals.semi1.homeScore > data.finals.semi1.awayScore ? data.finals.semi1.home : data.finals.semi1.away;
-      }
+  data.teams.forEach((team,index)=>{
+    team.name=names[index];
+  });
 
-      if (data.finals.semi2.homeScore !== null && data.finals.semi2.awayScore !== null) {
-        winner2 = data.finals.semi2.homeScore > data.finals.semi2.awayScore ? data.finals.semi2.home : data.finals.semi2.away;
-      }
+  commit();
+}
 
-      if (!data.finals.champ) {
-        data.finals.champ = { home: null, away: null, homeScore: null, awayScore: null };
-      }
+function renderSchedule(){
+  const rounds=Math.max(...data.games.map(game=>game.round));
 
-      data.finals.champ.home = winner1;
-      data.finals.champ.away = winner2;
-    }
+  let html=`
+    <div class="card">
+      <h2>Schedule</h2>
+      <p class="muted">
+        Scores must be non-negative whole numbers and cannot be tied.
+      </p>`;
 
-    function renderHome() {
-      if (!data) {
-        $("#view").innerHTML = `
-          <div class="card">
-            <h2>Create or load a tournament</h2>
-            <p class="muted">Manage a round-robin tournament in your browser.</p>
-            <div class="actions">
-              <button class="primary" onclick="showCreate()">New tournament</button>
-              <label class="button">
-                Import JSON
-                <input type="file" accept=".json,application/json" onchange="importJSON(event)" hidden>
-              </label>
-              <button onclick="resetToDefaultJSON()">Reload JSON</button>
-            </div>
+  for(let round=1;round<=rounds;round++){
+    html+=`<h3>Round ${round}</h3>`;
+
+    data.games
+      .filter(game=>game.round===round)
+      .forEach(game=>{
+        const completed=
+          game.homeScore!==null &&
+          game.awayScore!==null;
+
+        html+=`
+          <div class="game">
+            <div class="away">${esc(teamName(game.home))}</div>
+
+            <input
+              type="number"
+              min="0"
+              step="1"
+              id="h${game.id}"
+              value="${game.homeScore ?? ""}"
+              ${completed?"disabled":""}>
+
+            <div class="center">–</div>
+
+            <input
+              type="number"
+              min="0"
+              step="1"
+              id="a${game.id}"
+              value="${game.awayScore ?? ""}"
+              ${completed?"disabled":""}>
+
+            <div>${esc(teamName(game.away))}</div>
+
+            ${
+              completed
+                ? `<button onclick="editGame('${game.id}')">Edit</button>`
+                : `<button onclick="score('${game.id}')">Save</button>`
+            }
           </div>`;
-        return;
-      }
-
-      const completed = data.games ? data.games.filter(function(g) { return g.homeScore !== null && g.awayScore !== null; }).length : 0;
-      const totalGames = data.games ? data.games.length : 0;
-      const isComplete = allRRComplete();
-
-      $("#view").innerHTML = `
-        <div class="grid">
-          <div class="card">
-            <h2>${esc(data.name)}</h2>
-            <p>${data.teams ? data.teams.length : 0} teams · ${totalGames} games</p>
-            <p>${completed}/${totalGames} round-robin games completed.</p>
-            <div class="actions">
-              <button class="primary" onclick="go('schedule')">Enter scores</button>
-              <button onclick="go('standings')">View standings</button>
-              <button onclick="showCreate()">New tournament</button>
-            </div>
-          </div>
-          <div class="card">
-            <h3>Round-robin stage</h3>
-            <p>${data.roundRobinComplete ? "Status: <strong>Completed</strong>" : "Status: <strong>In progress</strong>"}</p>
-            <div class="actions">
-              <button class="primary" onclick="completeRR()" ${data.roundRobinComplete || !isComplete ? "disabled" : ""}>
-                Mark round robin complete
-              </button>
-            </div>
-            ${data.roundRobinComplete ? `<div class="actions"><button onclick="go('finals')">Go to Finals Bracket</button></div>` : ''}
-          </div>
-        </div>`;
-    }
-
-    function showCreate() {
-      $("#view").innerHTML = `
-        <div class="card">
-          <h2>Create New Tournament</h2>
-          <label style="display:block; margin-bottom:0.25rem; font-weight:500;">Tournament Name</label>
-          <input type="text" id="t-name" placeholder="e.g. Summer Championship">
-          <label style="display:block; margin-bottom:0.25rem; font-weight:500;">Team Names (one per line)</label>
-          <textarea id="t-teams" style="height:120px; margin-bottom:1rem;"></textarea>
-          <div class="actions">
-            <button class="primary" onclick="createTournament()">Create</button>
-            <button onclick="render()">Cancel</button>
-          </div>
-        </div>`;
-    }
-
-    function createTournament() {
-      const name = $("#t-name").value.trim() || "Untitled Tournament";
-      const teamsText = $("#t-teams").value.trim();
-      const teams = teamsText.split("\n").map(function(t) { return t.trim(); }).filter(Boolean);
-
-      if (teams.length < 2) {
-        alert("Please enter at least 2 teams.");
-        return;
-      }
-
-      const games = [];
-      let gameId = 1;
-      for (let i = 0; i < teams.length; i++) {
-        for (let j = i + 1; j < teams.length; j++) {
-          games.push({
-            id: gameId++,
-            home: teams[i],
-            away: teams[j],
-            homeScore: null,
-            awayScore: null
-          });
-        }
-      }
-
-      data = { name, teams, games, roundRobinComplete: false, finals: null };
-      save();
-      go("schedule");
-    }
-
-    function allRRComplete() {
-      if (!data || !data.games || data.games.length === 0) return false;
-      return data.games.every(function(g) { return g.homeScore !== null && g.awayScore !== null; });
-    }
-
-    function calculateStandings() {
-      if (!data || !data.teams || !data.games) return [];
-      const stats = {};
-      data.teams.forEach(function(t) {
-        stats[t] = { team: t, played: 0, wins: 0, losses: 0, ties: 0, points: 0 };
       });
 
-      data.games.forEach(function(g) {
-        if (g.homeScore !== null && g.awayScore !== null) {
-          if (stats[g.home]) stats[g.home].played++;
-          if (stats[g.away]) stats[g.away].played++;
+  }
 
-          if (g.homeScore > g.awayScore) {
-            if (stats[g.home]) { stats[g.home].wins++; stats[g.home].points += 3; }
-            if (stats[g.away]) { stats[g.away].losses++; }
-          } else if (g.awayScore > g.homeScore) {
-            if (stats[g.away]) { stats[g.away].wins++; stats[g.away].points += 3; }
-            if (stats[g.home]) { stats[g.home].losses++; }
-          } else {
-            if (stats[g.home]) { stats[g.home].ties++; stats[g.home].points += 1; }
-            if (stats[g.away]) { stats[g.away].ties++; stats[g.away].points += 1; }
-          }
-        }
-      });
+  html+=`</div>`;
+  $("#view").innerHTML=html;
+}
 
-      return Object.values(stats).sort(function(a, b) { return b.points - a.points; });
-    }
+function editGame(id){
+  const homeInput=$("#h"+id);
+  const awayInput=$("#a"+id);
+  const row=homeInput.closest(".game");
+  const button=row.querySelector("button");
 
-    function completeRR() {
-      if (!data) return;
-      data.roundRobinComplete = true;
+  homeInput.disabled=false;
+  awayInput.disabled=false;
 
-      const standings = calculateStandings();
-      if (standings.length >= 4) {
-        data.finals = {
-          semi1: { home: standings[0].team, away: standings[3].team, homeScore: null, awayScore: null },
-          semi2: { home: standings[1].team, away: standings[2].team, homeScore: null, awayScore: null },
-          champ: { home: null, away: null, homeScore: null, awayScore: null }
-        };
-      }
-      save();
-    }
+  button.textContent="Save";
+  button.onclick=()=>score(id);
 
-    function generateRounds(teamsList) {
-      const list = teamsList.slice();
-      if (list.length % 2 !== 0) list.push("BYE");
+  homeInput.focus();
+}
 
-      const n = list.length;
-      const totalRounds = n - 1;
-      const rounds = [];
+function score(id){
+  const game=data.games.find(item=>item.id===id);
+  const home=$("#h"+id).value;
+  const away=$("#a"+id).value;
 
-      for (let r = 0; r < totalRounds; r++) {
-        const roundData = { roundNumber: r + 1, matches: [], byeTeam: null };
-        for (let i = 0; i < n / 2; i++) {
-          const home = list[i];
-          const away = list[n - 1 - i];
+  if(
+    home==="" ||
+    away==="" ||
+    Number(home)<0 ||
+    Number(away)<0 ||
+    !Number.isInteger(Number(home)) ||
+    !Number.isInteger(Number(away)) ||
+    Number(home)===Number(away)
+  ){
+    alert(
+      "Enter two different, non-negative whole-number scores."
+    );
+    return;
+  }
 
-          if (home === "BYE") roundData.byeTeam = away;
-          else if (away === "BYE") roundData.byeTeam = home;
-          else roundData.matches.push({ home: home, away: away });
-        }
-        rounds.push(roundData);
-        list.splice(1, 0, list.pop());
-      }
-      return rounds;
-    }
+  snapshot();
 
-    function renderSchedule() {
-      if (!data || !data.games || !data.teams) {
-        $("#view").innerHTML = `
-          <div class="card">
-            <h2>Schedule</h2>
-            <p class="muted">No tournament data available.</p>
-            <div class="actions">
-              <button class="primary" onclick="showCreate()">New Tournament</button>
-            </div>
-          </div>`;
-        return;
-      }
+  game.homeScore=Number(home);
+  game.awayScore=Number(away);
 
-      const generatedRounds = generateRounds(data.teams);
-      let html = '<div class="card"><h2>Schedule</h2>';
+  commit();
+}
 
-      generatedRounds.forEach(function(r) {
-        const byeHtml = r.byeTeam ? '<span class="bye-badge">Bye: <strong>' + esc(r.byeTeam) + '</strong></span>' : '';
-        html += '<div class="round-header"><h3>Round ' + r.roundNumber + '</h3>' + byeHtml + '</div>';
+function renderStandings(){
+  const rows=standings();
+  const tiedGroups=getTiedGroups(rows);
 
-        r.matches.forEach(function(m) {
-          const game = data.games.find(function(g) {
-            return (g.home === m.home && g.away === m.away) || (g.home === m.away && g.away === m.home);
-          });
+  let html=`
+    <div class="card">
+      <h2>Standings</h2>
 
-          if (game) {
-            const hVal = game.homeScore !== null ? game.homeScore : '';
-            const aVal = game.awayScore !== null ? game.awayScore : '';
-            
-            html += `
-              <div class="game-row">
-                <span style="font-weight: 500;">${esc(game.home)} vs ${esc(game.away)}</span>
-                <div class="score-controls">
-                  <input type="number" id="home-score-${game.id}" class="score-input" value="${hVal}" placeholder="-">
-                  <span>:</span>
-                  <input type="number" id="away-score-${game.id}" class="score-input" value="${aVal}" placeholder="-">
-                  <button class="primary btn-sm" onclick="saveScore(${game.id})">Save</button>
-                  ${(hVal !== '' || aVal !== '') ? `<button class="btn-sm" onclick="clearScore(${game.id})">Reset</button>` : ''}
-                </div>
-              </div>
-            `;
-          }
-        });
-      });
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Seed</th>
+              <th>Team</th>
+              <th>GP</th>
+              <th>W</th>
+              <th>L</th>
+              <th>PF</th>
+              <th>PA</th>
+              <th>Overall +/-</th>
+              <th>Group H2H W-L</th>
+              <th>Group H2H +/-</th>
+              <th>Manual Order</th>
+            </tr>
+          </thead>
 
-      html += '</div>';
-      $("#view").innerHTML = html;
-    }
+          <tbody>
+            ${rows.map((row,index)=>{
+              const tiedGroup = tiedGroups.find(g => g.teamIndices.includes(row.i));
+              const style = tiedGroup ? `background-color:${tiedGroup.style.bg};` : "";
+              const hasGroupStats = row.hhW !== undefined;
 
-    function renderStandings() {
-      if (!data || !data.teams || !data.games) {
-        $("#view").innerHTML = `
-          <div class="card">
-            <h2>Standings</h2>
-            <p class="muted">No tournament data loaded yet.</p>
-          </div>`;
-        return;
-      }
-
-      const sorted = calculateStandings();
-
-      let html = `
-        <div class="card">
-          <h2>Standings</h2>
-          <div class="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Team</th>
-                  <th>P</th>
-                  <th>W</th>
-                  <th>D</th>
-                  <th>L</th>
-                  <th>Pts</th>
+              return `
+                <tr style="${style}">
+                  <td>${index+1}</td>
+                  <td>${esc(row.name)}</td>
+                  <td>${row.gp}</td>
+                  <td>${row.w}</td>
+                  <td>${row.l}</td>
+                  <td>${row.pf}</td>
+                  <td>${row.pa}</td>
+                  <td>${row.pm >= 0 ? "+" : ""}${row.pm}</td>
+                  <td>${hasGroupStats ? `${row.hhW}-${row.hhL}` : "—"}</td>
+                  <td>${hasGroupStats ? `${row.hhPM >= 0 ? "+" : ""}${row.hhPM}` : "—"}</td>
+                  <td>
+                    <input
+                      type="number"
+                      min="1"
+                      value="${row.order+1}"
+                      onchange="manualOrder(${row.i},this.value)">
+                  </td>
                 </tr>
-              </thead>
-              <tbody>`;
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
 
-      sorted.forEach(function(s) {
-        html += `
-          <tr>
-            <td><strong>${esc(s.team)}</strong></td>
-            <td>${s.played}</td>
-            <td>${s.wins}</td>
-            <td>${s.ties}</td>
-            <td>${s.losses}</td>
-            <td><strong>${s.points}</strong></td>
-          </tr>`;
-      });
+      <p class="muted">
+        <strong>Tiebreaker Priority Order:</strong><br>
+        1. Overall Win-Loss Record<br>
+        2. Head-to-Head Win-Loss Record among tied teams only<br>
+        3. Head-to-Head Point Differential among tied teams only<br>
+        4. Overall Point Differential<br>
+        5. Manual Order Override
+      </p>
+    </div>
 
-      html += '</tbody></table></div></div>';
-      $("#view").innerHTML = html;
-    }
+    ${renderHeadToHead(rows, tiedGroups)}`;
 
-    function renderFinals() {
-      if (!data || !data.roundRobinComplete) {
-        $("#view").innerHTML = `
-          <div class="card">
-            <h2>Finals Bracket</h2>
-            <p class="muted">The finals playoff bracket unlocks after marking the round-robin stage complete.</p>
-            <div class="actions">
-              <button class="primary" onclick="go('home')">Go to Home</button>
-            </div>
-          </div>`;
-        return;
+  $("#view").innerHTML=html;
+}
+
+function renderHeadToHead(teams, tiedGroups){
+  let legendHtml = "";
+
+  if(tiedGroups.length > 0){
+    legendHtml = `
+      <div class="tie-legend">
+        <span style="font-size:13px; font-weight:600; align-self:center;">Tied Record Groups:</span>
+        ${tiedGroups.map((group, idx) => `
+          <div class="tie-badge" style="background:${group.style.badgeBg}; border-color:${group.style.border}; color:${group.style.text};">
+            Group ${idx+1} (${group.wins} Wins): ${group.teamNames.map(n => esc(n)).join(", ")}
+          </div>
+        `).join("")}
+      </div>`;
+  }
+
+  return `
+    <div class="card">
+      <h2>Head-to-head results</h2>
+      <p class="muted">
+        Each cell shows the row team's win-loss record and point differential
+        against the column team. Highlighted cells represent matches between teams tied in overall record.
+      </p>
+
+      ${legendHtml}
+
+      <div class="scroll">
+        <table class="h2h-table">
+          <thead>
+            <tr>
+              <th>Team</th>
+              ${teams.map(team=>`<th>${esc(team.name)}</th>`).join("")}
+            </tr>
+          </thead>
+
+          <tbody>
+            ${teams.map(row=>{
+              return `
+                <tr>
+                  <th>${esc(row.name)}</th>
+
+                  ${teams.map(column=>{
+                    if(row.i===column.i){
+                      return `<td>—</td>`;
+                    }
+
+                    const result=headToHead(row.i,column.i);
+
+                    const tiedGroup = tiedGroups.find(g =>
+                      g.teamIndices.includes(row.i) && g.teamIndices.includes(column.i)
+                    );
+
+                    const cellStyle = tiedGroup
+                      ? `background-color:${tiedGroup.style.bg}; border:2px solid ${tiedGroup.style.border}; border-radius:4px;`
+                      : "";
+
+                    return `
+                      <td class="h2h-cell" style="${cellStyle}">
+                        <strong style="${tiedGroup ? `color:${tiedGroup.style.text}` : ''}">${result.homeW}-${result.awayW}</strong>
+                        <span>${result.differential>=0?"+":""}${result.differential}</span>
+                      </td>`;
+                  }).join("")}
+                </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        <small>
+          Format: win-loss, followed by point differential.
+          For example, 2-1 (+7) means two wins, one loss, and a seven-point advantage.
+        </small>
+      </p>
+    </div>`;
+}
+
+function manualOrder(index,value){
+  const order=Number(value);
+
+  if(!Number.isInteger(order)||order<1||order>data.teams.length){
+    alert("Manual order must be between 1 and the number of teams.");
+    render();
+    return;
+  }
+
+  snapshot();
+  data.teams[index].order=order-1;
+  commit();
+}
+
+function completeRR(){
+  if(!allRRComplete()){
+    alert("Complete every round-robin game first.");
+    return;
+  }
+
+  snapshot();
+  data.roundRobinComplete=true;
+  data.stage="finals";
+  commit();
+}
+
+function renderFinals(){
+  if(!data.roundRobinComplete){
+    $("#view").innerHTML=`
+      <div class="card">
+        <h2>Finals</h2>
+        <p>
+          Complete all round-robin games, then mark the round-robin stage complete
+          from the Overview page.
+        </p>
+        <button onclick="go('home')">Back to overview</button>
+      </div>`;
+    return;
+  }
+
+  if(!data.finals){
+    renderFinalSetup();
+    return;
+  }
+
+  renderBracket();
+}
+
+function renderFinalSetup(){
+  const rows=standings().slice(0,4);
+
+  $("#view").innerHTML=`
+    <div class="card">
+      <h2>Configure finals</h2>
+      <p class="muted">
+        Select any two distinct seeds for each semifinal.
+        Every top-four seed must be used once.
+      </p>
+
+      <div class="grid">
+        <label>
+          Semifinal 1
+          <select id="f1a">${seedOptions(rows)}</select>
+          <select id="f1b">${seedOptions(rows)}</select>
+        </label>
+
+        <label>
+          Semifinal 2
+          <select id="f2a">${seedOptions(rows)}</select>
+          <select id="f2b">${seedOptions(rows)}</select>
+        </label>
+      </div>
+
+      <button class="primary" onclick="createFinals()">
+        Create finals bracket
+      </button>
+    </div>`;
+}
+
+function seedOptions(rows){
+  return rows.map((row,index)=>
+    `<option value="${index}">
+      Seed ${index+1} — ${esc(row.name)}
+    </option>`
+  ).join("");
+}
+
+function createFinals(){
+  const pairs=[
+    [Number($("#f1a").value),Number($("#f1b").value)],
+    [Number($("#f2a").value),Number($("#f2b").value)]
+  ];
+
+  const used=pairs.flat();
+
+  if(
+    pairs.some(pair=>pair[0]===pair[1]) ||
+    new Set(used).size!==4
+  ){
+    alert(
+      "Each semifinal must contain two different seeds, and every seed must be used once."
+    );
+    return;
+  }
+
+  snapshot();
+
+  data.finals={
+    semis:[
+      newSeries("Semifinal 1",pairs[0]),
+      newSeries("Semifinal 2",pairs[1])
+    ],
+    champ:newSeries("Championship",null),
+    third:newSeries("Third place",null)
+  };
+
+  commit();
+}
+
+function newSeries(name,seeds){
+  return {
+    id:uid(),
+    name,
+    seeds,
+    games:[],
+    winner:null,
+    loser:null
+  };
+}
+
+function seedTeam(seed){
+  return standings()[seed]?.name || "Unknown";
+}
+
+function getSeries(key){
+  if(key==="champ")return data.finals.champ;
+  if(key==="third")return data.finals.third;
+  return data.finals.semis[Number(key[1])];
+}
+
+function renderBracket(){
+  const finals=data.finals;
+
+  let html=`
+    <div class="card">
+      <h2>Finals bracket</h2>
+      <p class="muted">
+        Every series is best-of-three. A series ends automatically after two wins.
+      </p>
+
+      ${seriesHTML(finals.semis[0],"s0")}
+      ${seriesHTML(finals.semis[1],"s1")}
+      ${finals.champ.seeds?seriesHTML(finals.champ,"champ"):""}
+      ${finals.third.seeds?seriesHTML(finals.third,"third"):""}
+    </div>`;
+
+  $("#view").innerHTML=html;
+}
+
+function seriesHTML(series,key){
+  const label=series.seeds
+    ? `${esc(seedTeam(series.seeds[0]))} vs ${esc(seedTeam(series.seeds[1]))}`
+    : "Awaiting semifinal winners";
+
+  const games=series.games.map(game=>{
+    const completed=
+      game.x!==null &&
+      game.y!==null;
+
+    return `
+      <div class="game">
+        <div class="away">${esc(game.a)}</div>
+
+        <input
+          id="x${game.id}"
+          type="number"
+          min="0"
+          step="1"
+          value="${game.x ?? ""}"
+          ${completed?"disabled":""}>
+
+        <div>–</div>
+
+        <input
+          id="y${game.id}"
+          type="number"
+          min="0"
+          step="1"
+          value="${game.y ?? ""}"
+          ${completed?"disabled":""}>
+
+        <div>${esc(game.b)}</div>
+
+        ${
+          completed
+            ? `<button onclick="editSeriesGame('${key}','${game.id}')">Edit</button>`
+            : `<button onclick="seriesScore('${key}','${game.id}')">Save</button>`
+        }
+      </div>`;
+  }).join("");
+
+  return `
+    <div class="series">
+      <h3>
+        ${esc(series.name)}
+        <small>${label}</small>
+      </h3>
+
+      ${games}
+
+      <button
+        onclick="addSeriesGame('${key}')"
+        ${!series.seeds || series.winner?"disabled":""}>
+        Add game
+      </button>
+
+      ${
+        series.winner
+          ? `<p class="success">
+              Winner: ${esc(series.winner)}
+              · Loser: ${esc(series.loser)}
+            </p>`
+          : ""
+      }
+    </div>`;
+}
+
+function editSeriesGame(key,id){
+  const xInput=$("#x"+id);
+  const yInput=$("#y"+id);
+  const row=xInput.closest(".game");
+  const button=row.querySelector("button");
+
+  xInput.disabled=false;
+  yInput.disabled=false;
+
+  button.textContent="Save";
+  button.onclick=()=>seriesScore(key,id);
+
+  xInput.focus();
+}
+
+function addSeriesGame(key){
+  const series=getSeries(key);
+
+  if(!series.seeds || series.winner){
+    return;
+  }
+
+  const a=seedTeam(series.seeds[0]);
+  const b=seedTeam(series.seeds[1]);
+
+  snapshot();
+
+  series.games.push({
+    id:uid(),
+    a,
+    b,
+    x:null,
+    y:null
+  });
+
+  commit();
+}
+
+function seriesScore(key,id){
+  const series=getSeries(key);
+  const game=series.games.find(item=>item.id===id);
+
+  const x=$("#x"+id).value;
+  const y=$("#y"+id).value;
+
+  if(
+    x==="" ||
+    y==="" ||
+    Number(x)<0 ||
+    Number(y)<0 ||
+    !Number.isInteger(Number(x)) ||
+    !Number.isInteger(Number(y)) ||
+    Number(x)===Number(y)
+  ){
+    alert(
+      "Enter two different, non-negative whole-number scores."
+    );
+    return;
+  }
+
+  snapshot();
+
+  game.x=Number(x);
+  game.y=Number(y);
+
+  reevaluateSeries(series);
+  advanceFinals();
+
+  commit();
+}
+
+function reevaluateSeries(series){
+  const winsA=series.games.filter(game=>
+    game.x!==null && game.x>game.y
+  ).length;
+
+  const winsB=series.games.filter(game=>
+    game.x!==null && game.y>game.x
+  ).length;
+
+  if(winsA>=2 || winsB>=2){
+    series.winner=winsA>winsB
+      ? series.games[0].a
+      : series.games[0].b;
+
+    series.loser=winsA>winsB
+      ? series.games[0].b
+      : series.games[0].a;
+  }else{
+    series.winner=null;
+    series.loser=null;
+  }
+}
+
+function advanceFinals(){
+  const finals=data.finals;
+  const first=finals.semis[0];
+  const second=finals.semis[1];
+
+  if(first.winner && second.winner){
+    const winner1Seed = data.teams.findIndex(team=>team.name===first.winner);
+    const winner2Seed = data.teams.findIndex(team=>team.name===second.winner);
+    const loser1Seed = data.teams.findIndex(team=>team.name===first.loser);
+    const loser2Seed = data.teams.findIndex(team=>team.name===second.loser);
+
+    const standingsRows = standings();
+
+    finals.champ.seeds = [
+      standingsRows.findIndex(r => r.i === winner1Seed),
+      standingsRows.findIndex(r => r.i === winner2Seed)
+    ];
+
+    finals.third.seeds = [
+      standingsRows.findIndex(r => r.i === loser1Seed),
+      standingsRows.findIndex(r => r.i === loser2Seed)
+    ];
+  }else{
+    if(finals.champ.games.length===0) finals.champ.seeds=null;
+    if(finals.third.games.length===0) finals.third.seeds=null;
+  }
+}
+
+function renderData(){
+  $("#view").innerHTML=`
+    <div class="card">
+      <h2>Import / Export</h2>
+
+      <p>
+        Tournament data is saved automatically in this browser.
+      </p>
+
+      <button class="primary" onclick="exportJSON()">
+        Export JSON
+      </button>
+
+      <label class="button">
+        Import JSON
+        <input
+          type="file"
+          accept=".json,application/json"
+          onchange="importJSON(event)"
+          hidden>
+      </label>
+
+      <button onclick="loadDefaultJSON()">
+        Reload default tournament_data.json
+      </button>
+
+      <button class="danger" onclick="clearLocalStorage()">
+        Clear local storage
+      </button>
+    </div>`;
+}
+
+function exportJSON(){
+  if(!data)return;
+
+  const blob=new Blob(
+    [JSON.stringify(data,null,2)],
+    {type:"application/json"}
+  );
+
+  const link=document.createElement("a");
+
+  link.href=URL.createObjectURL(blob);
+  link.download=
+    (data.name.replace(/[^a-z0-9]+/gi,"-") || "tournament")+
+    ".json";
+
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function importJSON(event){
+  const file=event.target.files[0];
+
+  if(!file)return;
+
+  const reader=new FileReader();
+
+  reader.onload=()=>{
+    try{
+      const imported=JSON.parse(reader.result);
+
+      if(
+        !imported.teams ||
+        !Array.isArray(imported.teams) ||
+        !Array.isArray(imported.games)
+      ){
+        throw new Error("Invalid file structure");
       }
 
-      if (!data.finals) {
-        completeRR();
-      }
-
-      const f = data.finals || {};
-      const semi1 = f.semi1 || {};
-      const semi2 = f.semi2 || {};
-      const champ = f.champ || {};
-
-      $("#view").innerHTML = `
-        <div class="card">
-          <h2>4-Team Playoff Bracket</h2>
-          <div class="bracket">
-            <div class="bracket-column">
-              <h3>Semifinals</h3>
-              
-              <!-- Semi 1 -->
-              <div class="matchup">
-                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.4rem;">Seed #1 vs Seed #4</p>
-                <div class="game-row" style="border-bottom:none; padding:0;">
-                  <span>${esc(semi1.home || 'TBD')} vs ${esc(semi1.away || 'TBD')}</span>
-                  <div class="score-controls">
-                    <input type="number" id="final-home-semi1" class="score-input" value="${semi1.homeScore ?? ''}" placeholder="-">
-                    <span>:</span>
-                    <input type="number" id="final-away-semi1" class="score-input" value="${semi2.awayScore ?? ''}" placeholder="-">
-                    <button class="primary btn-sm" onclick="saveFinalsScore('semi1')">Save</button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Semi 2 -->
-              <div class="matchup">
-                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.4rem;">Seed #2 vs Seed #3</p>
-                <div class="game-row" style="border-bottom:none; padding:0;">
-                  <span>${esc(semi2.home || 'TBD')} vs ${esc(semi2.away || 'TBD')}</span>
-                  <div class="score-controls">
-                    <input type="number" id="final-home-semi2" class="score-input" value="${semi2.homeScore ?? ''}" placeholder="-">
-                    <span>:</span>
-                    <input type="number" id="final-away-semi2" class="score-input" value="${semi2.awayScore ?? ''}" placeholder="-">
-                    <button class="primary btn-sm" onclick="saveFinalsScore('semi2')">Save</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div class="bracket-column">
-              <h3>Championship</h3>
-              <div class="matchup" style="border-color: var(--primary);">
-                <p style="font-size:0.85rem; color:var(--primary); margin-bottom:0.4rem; font-weight:bold;">Finals Match</p>
-                <div class="game-row" style="border-bottom:none; padding:0;">
-                  <span>${esc(champ.home || 'TBD')} vs ${esc(champ.away || 'TBD')}</span>
-                  <div class="score-controls">
-                    <input type="number" id="final-home-champ" class="score-input" value="${champ.homeScore ?? ''}" placeholder="-">
-                    <span>:</span>
-                    <input type="number" id="final-away-champ" class="score-input" value="${champ.awayScore ?? ''}" placeholder="-">
-                    <button class="primary btn-sm" onclick="saveFinalsScore('champ')">Save</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
+      snapshot();
+      data=imported;
+      currentView="home";
+      commit();
+    }catch(error){
+      alert("That file is not a valid tournament JSON file.");
     }
+  };
 
-    function renderDataView() {
-      $("#view").innerHTML = `
-        <div class="card">
-          <h2>Data Management</h2>
-          <p class="muted">Export or import your tournament data as a JSON file.</p>
-          <div class="actions">
-            <button class="primary" onclick="exportJSON()">Export JSON</button>
-            <label class="button">
-              Import JSON
-              <input type="file" accept=".json,application/json" onchange="importJSON(event)" hidden>
-            </label>
-            <button onclick="resetToDefaultJSON()">Reset JSON</button>
-          </div>
-        </div>
-      `;
+  reader.readAsText(file);
+}
+
+async function loadDefaultJSON(){
+  try{
+    const response = await fetch(DEFAULT_JSON_PATH);
+    if(!response.ok){
+      throw new Error("Unable to fetch JSON");
     }
+    const imported = await response.json();
+    snapshot();
+    data = imported;
+    currentView = "home";
+    commit();
+  }catch(err){
+    console.warn("Could not load default JSON automatically:", err);
+    render();
+  }
+}
 
-    function exportJSON() {
-      if (!data) return;
-      const str = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data, null, 2));
-      const downloadAnchor = document.createElement("a");
-      downloadAnchor.setAttribute("href", str);
-      downloadAnchor.setAttribute("download", `${(data.name || 'tournament').toLowerCase().replace(/\s+/g, '_')}_data.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
+function clearLocalStorage(){
+  if(confirm("Clear all locally saved tournament data?")){
+    localStorage.removeItem(KEY);
+    data=null;
+    undoStack=[];
+    currentView="home";
+    render();
+  }
+}
+
+function deleteTournament(){
+  if(confirm("Delete this tournament from this browser?")){
+    snapshot();
+    data=null;
+    localStorage.removeItem(KEY);
+    currentView="home";
+    render();
+  }
+}
+
+async function init(){
+  try{
+    const stored = localStorage.getItem(KEY);
+    if(stored){
+      data = JSON.parse(stored);
     }
+  }catch(e){
+    data = null;
+  }
 
-    function render() {
-      renderNav();
-      if (currentView === "home") renderHome();
-      else if (currentView === "schedule") renderSchedule();
-      else if (currentView === "standings") renderStandings();
-      else if (currentView === "finals") renderFinals();
-      else if (currentView === "data") renderDataView();
-    }
+  if(!data){
+    await loadDefaultJSON();
+  }else{
+    render();
+  }
+}
 
-    window.addEventListener("DOMContentLoaded", init);
-  </script>
+init();
+</script>
 </body>
 </html>
