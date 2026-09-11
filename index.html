@@ -310,8 +310,6 @@ small{
 "use strict";
 
 const KEY="rr-tournament-v1";
-const DEFAULT_JSON_PATH="./tournament_data.json";
-
 let data=null;
 let undoStack=[];
 let currentView="home";
@@ -367,7 +365,6 @@ function undo(){
 
 function touch(){
   if(data){
-    data.meta = data.meta || {};
     data.meta.updated=new Date().toISOString();
   }
 }
@@ -448,15 +445,13 @@ function makeSchedule(n){
 }
 
 function allRRComplete(){
-  return data && data.games && data.games.every(game=>
+  return data.games.every(game=>
     game.homeScore!==null &&
     game.awayScore!==null
   );
 }
 
 function standings(){
-  if(!data || !data.teams) return [];
-
   const rows=data.teams.map((team,index)=>({
     i:index,
     id:team.id,
@@ -470,15 +465,13 @@ function standings(){
     order:team.order ?? index
   }));
 
-  for(const game of (data.games || [])){
+  for(const game of data.games){
     if(game.homeScore===null || game.awayScore===null){
       continue;
     }
 
     const home=rows[game.home];
     const away=rows[game.away];
-    if(!home || !away) continue;
-
     const hs=Number(game.homeScore);
     const as=Number(game.awayScore);
 
@@ -554,6 +547,11 @@ function standings(){
       });
 
       // Tiebreaker Hierarchy:
+      // 1) Overall Wins (handled by outer grouping)
+      // 2) Head-to-Head Win-Loss Differential among tied teams
+      // 3) Head-to-Head Point Differential among tied teams
+      // 4) Overall Point Differential
+      // 5) Manual Order
       group.sort((a,b) =>
         (b.hhW - b.hhL) - (a.hhW - a.hhL) ||
         b.hhPM - a.hhPM ||
@@ -605,7 +603,7 @@ function headToHead(homeIndex,awayIndex){
   let awayW=0;
   let differential=0;
 
-  for(const game of (data.games || [])){
+  for(const game of data.games){
     if(
       game.homeScore===null ||
       game.awayScore===null
@@ -706,18 +704,17 @@ function renderHome(){
   if(!data){
     $("#view").innerHTML=`
       <div class="card">
-        <h2>Create or load a tournament</h2>
+        <h2>Create a tournament</h2>
         <p class="muted">
           Manage a complete round-robin tournament and four-team finals bracket in your browser.
         </p>
         <button class="primary" onclick="showCreate()">New tournament</button>
         <button onclick="go('data')">Import JSON</button>
-        <button onclick="loadDefaultJSON()">Load tournament_data.json</button>
       </div>`;
     return;
   }
 
-  const completed=(data.games || []).filter(game=>
+  const completed=data.games.filter(game=>
     game.homeScore!==null
   ).length;
 
@@ -725,8 +722,8 @@ function renderHome(){
     <div class="grid">
       <div class="card">
         <h2>${esc(data.name)}</h2>
-        <p>${data.teams ? data.teams.length : 0} teams · ${data.games ? data.games.length : 0} games</p>
-        <p>${completed}/${data.games ? data.games.length : 0} round-robin games completed.</p>
+        <p>${data.teams.length} teams · ${data.games.length} games</p>
+        <p>${completed}/${data.games.length} round-robin games completed.</p>
 
         <div class="actions">
           <button class="primary" onclick="go('schedule')">
@@ -1501,11 +1498,7 @@ function renderData(){
           hidden>
       </label>
 
-      <button onclick="loadDefaultJSON()">
-        Reload default tournament_data.json
-      </button>
-
-      <button class="danger" onclick="clearLocalStorage()">
+      <button onclick="clearLocalStorage()">
         Clear local storage
       </button>
     </div>`;
@@ -1542,11 +1535,11 @@ function importJSON(event){
       const imported=JSON.parse(reader.result);
 
       if(
-        !imported.teams ||
+        !imported.meta ||
         !Array.isArray(imported.teams) ||
         !Array.isArray(imported.games)
       ){
-        throw new Error("Invalid file structure");
+        throw new Error("Invalid file");
       }
 
       snapshot();
@@ -1559,23 +1552,6 @@ function importJSON(event){
   };
 
   reader.readAsText(file);
-}
-
-async function loadDefaultJSON(){
-  try{
-    const response = await fetch(DEFAULT_JSON_PATH);
-    if(!response.ok){
-      throw new Error("Unable to fetch JSON");
-    }
-    const imported = await response.json();
-    snapshot();
-    data = imported;
-    currentView = "home";
-    commit();
-  }catch(err){
-    console.warn("Could not load default JSON automatically:", err);
-    render();
-  }
 }
 
 function clearLocalStorage(){
@@ -1598,24 +1574,13 @@ function deleteTournament(){
   }
 }
 
-async function init(){
-  try{
-    const stored = localStorage.getItem(KEY);
-    if(stored){
-      data = JSON.parse(stored);
-    }
-  }catch(e){
-    data = null;
-  }
-
-  if(!data){
-    await loadDefaultJSON();
-  }else{
-    render();
-  }
+try{
+  data=JSON.parse(localStorage.getItem(KEY) || "null");
+}catch(error){
+  data=null;
 }
 
-init();
+render();
 </script>
 </body>
 </html>
