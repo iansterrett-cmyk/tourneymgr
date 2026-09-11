@@ -1,0 +1,592 @@
+{
+  "meta": {
+    "schema": 1,
+    "created": "2026-09-11T15:40:07.401Z",
+    "updated": "2026-09-11T16:03:45.623Z"
+  },
+  "id": "42gpx6u9l38mtx4haw9",
+  "name": "2026 East Coast",
+  "stage": "roundrobin",
+  "roundRobinComplete": true,
+  "teams": [
+    {
+      "id": "ugxv50t3d6gmtx4haw9",
+      "name": "Damon/Kantor"
+    },
+    {
+      "id": "dksvsopw1ucmtx4haw9",
+      "name": "Kaye/Hesselberth"
+    },
+    {
+      "id": "z5hbphxh0ymtx4haw9",
+      "name": "Preiss/Minford"
+    },
+    {
+      "id": "3it4sgq4qd4mtx4haw9",
+      "name": "Joswiak/Ward"
+    },
+    {
+      "id": "7zqggdpa5timtx4haw9",
+      "name": "Koonts/Cooksey"
+    },
+    {
+      "id": "eq9iz17yf6gmtx4haw9",
+      "name": "Cinquini/Webb"
+    },
+    {
+      "id": "1q01vwwb2lhmtx4haw9",
+      "name": "Paschal/Andrews"
+    },
+    {
+      "id": "8wp0yp5dgimtx4haw9",
+      "name": "Cymrot/Cole"
+    },
+    {
+      "id": "f196zuj9hzmmtx4haw9",
+      "name": "Sterrett/Sterrett"
+    },
+    {
+      "id": "bkdllw2p8wsmtx4haw9",
+      "name": "Bajwa/Sterrett"
+    },
+    {
+      "id": "1ppe98efmwemtx4haw9",
+      "name": "Munson/Oesterheld"
+    }
+  ],
+  "games": [
+    {
+      "id": "t1jl17e7nymtx4haw9",
+      "round": 1,
+      "home": 10,
+      "away": 1,
+      "homeScore": 3,
+      "awayScore": 15
+    },
+    {
+      "id": "27pgkv8y3dmtx4haw9",
+      "round": 1,
+      "home": 2,
+      "away": 9,
+      "homeScore": 16,
+      "awayScore": 6
+    },
+    {
+      "id": "pryvbm0w3nmtx4haw9",
+      "round": 1,
+      "home": 8,
+      "away": 3,
+      "homeScore": 14,
+      "awayScore": 16
+    },
+    {
+      "id": "08vv3suhzx1cmtx4haw9",
+      "round": 1,
+      "home": 4,
+      "away": 7,
+      "homeScore": 4,
+      "awayScore": 15
+    },
+    {
+      "id": "v6m85qvqd4bmtx4haw9",
+      "round": 1,
+      "home": 6,
+      "away": 5,
+      "homeScore": 13,
+      "awayScore": 15
+    },
+    {
+      "id": "kqcbxjq7jqdmtx4haw9",
+      "round": 2,
+      "home": 10,
+      "away": 0,
+      "homeScore": 11,
+      "awayScore": 15
+    },
+    {
+      "id": "n2vyjgs6biomtx4haw9",
+      "round": 2,
+      "home": 8,
+      "away": 1,
+      "homeScore": 13,
+      "awayScore": 15
+    },
+    {
+      "id": "wo6n67ftp7mtx4haw9",
+      "round": 2,
+      "home": 2,
+      "away": 7,
+      "homeScore": 12,
+      "awayScore": 15
+    },
+    {
+      "id": "cbsp8ii2g9mtx4haw9",
+      "round": 2,
+      "home": 6,
+      "away": 3,
+      "homeScore": 15,
+      "awayScore": 2
+    },
+    {
+      "id": "vskkhn0ky0kmtx4haw9",
+      "round": 2,
+      "home": 4,
+      "away": 5,
+      "homeScore": 15,
+      "awayScore": 19
+    },
+    {
+      "id": "53dy8ed8406mtx4haw9",
+      "round": 3,
+      "home": 0,
+      "away": 9,
+      "homeScore": 15,
+      "awayScore": 7
+    },
+    {
+      "id": "2wtct586n1hmtx4haw9",
+      "round": 3,
+      "home": 8,
+      "away": 10,
+      "homeScore": 15,
+      "awayScore": 6
+    },
+    {
+      "id": "1f1e01vjccymtx4haw9",
+      "round": 3,
+      "home": 6,
+      "away": 1,
+      "homeScore": 15,
+      "awayScore": 11
+    },
+    {
+      "id": "1ckb0mhrr2qmtx4haw9",
+      "round": 3,
+      "home": 2,
+      "away": 5,
+      "homeScore": 15,
+      "awayScore": 12
+    },
+    {
+      "id": "30hzs3l93jwmtx4haw9",
+      "round": 3,
+      "home": 4,
+      "away": 3,
+      "homeScore": 16,
+      "awayScore": 14
+    },
+    {
+      "id": "ykm40p0q2fomtx4haw9",
+      "round": 4,
+      "home": 8,
+      "away": 0,
+      "homeScore": 11,
+      "awayScore": 15
+    },
+    {
+      "id": "t1jkex03lpnmtx4haw9",
+      "round": 4,
+      "home": 9,
+      "away": 7,
+      "homeScore": 17,
+      "awayScore": 15
+    },
+    {
+      "id": "t946erti3qemtx4haw9",
+      "round": 4,
+      "home": 6,
+      "away": 10,
+      "homeScore": 4,
+      "awayScore": 15
+    },
+    {
+      "id": "kh7w7vncxvimtx4haw9",
+      "round": 4,
+      "home": 4,
+      "away": 1,
+      "homeScore": 5,
+      "awayScore": 15
+    },
+    {
+      "id": "n90wb49dv3jmtx4haw9",
+      "round": 4,
+      "home": 2,
+      "away": 3,
+      "homeScore": 6,
+      "awayScore": 15
+    },
+    {
+      "id": "3wxsp2ybpm8mtx4haw9",
+      "round": 5,
+      "home": 0,
+      "away": 7,
+      "homeScore": 15,
+      "awayScore": 4
+    },
+    {
+      "id": "fjtr45mx4rmtx4haw9",
+      "round": 5,
+      "home": 6,
+      "away": 8,
+      "homeScore": 15,
+      "awayScore": 9
+    },
+    {
+      "id": "wt4j3s1x02mtx4haw9",
+      "round": 5,
+      "home": 9,
+      "away": 5,
+      "homeScore": 15,
+      "awayScore": 13
+    },
+    {
+      "id": "h8vjcl6t2jgmtx4haw9",
+      "round": 5,
+      "home": 4,
+      "away": 10,
+      "homeScore": 4,
+      "awayScore": 15
+    },
+    {
+      "id": "eqh63qqj6h8mtx4haw9",
+      "round": 5,
+      "home": 2,
+      "away": 1,
+      "homeScore": 7,
+      "awayScore": 15
+    },
+    {
+      "id": "wv02nsu39wlmtx4haw9",
+      "round": 6,
+      "home": 6,
+      "away": 0,
+      "homeScore": 16,
+      "awayScore": 4
+    },
+    {
+      "id": "y4j4sd63gi9mtx4haw9",
+      "round": 6,
+      "home": 7,
+      "away": 5,
+      "homeScore": 13,
+      "awayScore": 15
+    },
+    {
+      "id": "4vglklwnsbdmtx4haw9",
+      "round": 6,
+      "home": 4,
+      "away": 8,
+      "homeScore": 17,
+      "awayScore": 15
+    },
+    {
+      "id": "60suneponvumtx4haw9",
+      "round": 6,
+      "home": 9,
+      "away": 3,
+      "homeScore": 12,
+      "awayScore": 15
+    },
+    {
+      "id": "rqhybcuyjjbmtx4haw9",
+      "round": 6,
+      "home": 2,
+      "away": 10,
+      "homeScore": 12,
+      "awayScore": 15
+    },
+    {
+      "id": "ejyielfbm4umtx4haw9",
+      "round": 7,
+      "home": 0,
+      "away": 5,
+      "homeScore": 15,
+      "awayScore": 8
+    },
+    {
+      "id": "hc34t0psq3mtx4haw9",
+      "round": 7,
+      "home": 4,
+      "away": 6,
+      "homeScore": 15,
+      "awayScore": 7
+    },
+    {
+      "id": "jt97srfomfjmtx4haw9",
+      "round": 7,
+      "home": 7,
+      "away": 3,
+      "homeScore": 15,
+      "awayScore": 12
+    },
+    {
+      "id": "b7cl33jeondmtx4haw9",
+      "round": 7,
+      "home": 2,
+      "away": 8,
+      "homeScore": 15,
+      "awayScore": 11
+    },
+    {
+      "id": "u24hctqrgzsmtx4haw9",
+      "round": 7,
+      "home": 9,
+      "away": 1,
+      "homeScore": 4,
+      "awayScore": 15
+    },
+    {
+      "id": "0ipqudor1akmtx4haw9",
+      "round": 8,
+      "home": 4,
+      "away": 0,
+      "homeScore": 12,
+      "awayScore": 15
+    },
+    {
+      "id": "aobrw75lzptmtx4haw9",
+      "round": 8,
+      "home": 5,
+      "away": 3,
+      "homeScore": 13,
+      "awayScore": 15
+    },
+    {
+      "id": "89mghxq4m7bmtx4haw9",
+      "round": 8,
+      "home": 2,
+      "away": 6,
+      "homeScore": 13,
+      "awayScore": 15
+    },
+    {
+      "id": "cv03g82y0ngmtx4haw9",
+      "round": 8,
+      "home": 7,
+      "away": 1,
+      "homeScore": 16,
+      "awayScore": 12
+    },
+    {
+      "id": "e6l3ibiq9damtx4haw9",
+      "round": 8,
+      "home": 9,
+      "away": 10,
+      "homeScore": 14,
+      "awayScore": 16
+    },
+    {
+      "id": "dr87ystx13wmtx4haw9",
+      "round": 9,
+      "home": 0,
+      "away": 3,
+      "homeScore": 15,
+      "awayScore": 11
+    },
+    {
+      "id": "u12etghkstqmtx4haw9",
+      "round": 9,
+      "home": 2,
+      "away": 4,
+      "homeScore": 15,
+      "awayScore": 9
+    },
+    {
+      "id": "vc342nsnk69mtx4haw9",
+      "round": 9,
+      "home": 5,
+      "away": 1,
+      "homeScore": 15,
+      "awayScore": 4
+    },
+    {
+      "id": "t9be5583y2qmtx4haw9",
+      "round": 9,
+      "home": 7,
+      "away": 10,
+      "homeScore": 15,
+      "awayScore": 12
+    },
+    {
+      "id": "gjqamh9oujjmtx4haw9",
+      "round": 9,
+      "home": 9,
+      "away": 8,
+      "homeScore": 15,
+      "awayScore": 13
+    },
+    {
+      "id": "arddxrgop47mtx4haw9",
+      "round": 10,
+      "home": 2,
+      "away": 0,
+      "homeScore": 11,
+      "awayScore": 15
+    },
+    {
+      "id": "79utxajqyqqmtx4haw9",
+      "round": 10,
+      "home": 3,
+      "away": 1,
+      "homeScore": 12,
+      "awayScore": 15
+    },
+    {
+      "id": "f0nvi7l7oaamtx4haw9",
+      "round": 10,
+      "home": 5,
+      "away": 10,
+      "homeScore": 12,
+      "awayScore": 15
+    },
+    {
+      "id": "5ei0q3rgwg3mtx4haw9",
+      "round": 10,
+      "home": 9,
+      "away": 6,
+      "homeScore": 4,
+      "awayScore": 15
+    },
+    {
+      "id": "xu8vnl0lmgomtx4haw9",
+      "round": 10,
+      "home": 7,
+      "away": 8,
+      "homeScore": 9,
+      "awayScore": 15
+    },
+    {
+      "id": "z33xl1ox239mtx4haw9",
+      "round": 11,
+      "home": 0,
+      "away": 1,
+      "homeScore": 14,
+      "awayScore": 16
+    },
+    {
+      "id": "ma6eso4xv1bmtx4haw9",
+      "round": 11,
+      "home": 3,
+      "away": 10,
+      "homeScore": 12,
+      "awayScore": 15
+    },
+    {
+      "id": "golwpd8l4zumtx4haw9",
+      "round": 11,
+      "home": 9,
+      "away": 4,
+      "homeScore": 15,
+      "awayScore": 3
+    },
+    {
+      "id": "zfztnoyp91gmtx4haw9",
+      "round": 11,
+      "home": 5,
+      "away": 8,
+      "homeScore": 15,
+      "awayScore": 11
+    },
+    {
+      "id": "o729kjx1uznmtx4haw9",
+      "round": 11,
+      "home": 7,
+      "away": 6,
+      "homeScore": 4,
+      "awayScore": 15
+    }
+  ],
+  "finals": {
+    "semis": [
+      {
+        "id": "t1z0qg4y79rmtx5afh1",
+        "name": "Semifinal 1",
+        "seeds": [
+          1,
+          3
+        ],
+        "games": [
+          {
+            "id": "870jbr7cywvmtx5ai6o",
+            "a": "Paschal/Andrews",
+            "b": "Munson/Oesterheld",
+            "x": 21,
+            "y": 8
+          },
+          {
+            "id": "ztvxcgcxt1mtx5arm1",
+            "a": "Paschal/Andrews",
+            "b": "Munson/Oesterheld",
+            "x": 20,
+            "y": 22
+          },
+          {
+            "id": "amqxx12tgn5mtx5b2bn",
+            "a": "Paschal/Andrews",
+            "b": "Munson/Oesterheld",
+            "x": 21,
+            "y": 13
+          }
+        ],
+        "winner": "Paschal/Andrews",
+        "loser": "Munson/Oesterheld"
+      },
+      {
+        "id": "v10sli1lt9mtx5afh1",
+        "name": "Semifinal 2",
+        "seeds": [
+          0,
+          2
+        ],
+        "games": [
+          {
+            "id": "rf9d19brgz7mtx5babn",
+            "a": "Damon/Kantor",
+            "b": "Kaye/Hesselberth",
+            "x": 21,
+            "y": 17
+          },
+          {
+            "id": "oqw9svhutvbmtx5bhl8",
+            "a": "Damon/Kantor",
+            "b": "Kaye/Hesselberth",
+            "x": 21,
+            "y": 19
+          }
+        ],
+        "winner": "Damon/Kantor",
+        "loser": "Kaye/Hesselberth"
+      }
+    ],
+    "champ": {
+      "id": "17deq5dal0pmtx5afh1",
+      "name": "Championship",
+      "seeds": [
+        "Paschal/Andrews",
+        "Damon/Kantor"
+      ],
+      "games": [
+        {
+          "id": "a4m56tz1lfbmtx5bp7b",
+          "a": "Unknown",
+          "b": "Unknown",
+          "x": null,
+          "y": null
+        }
+      ],
+      "winner": null,
+      "loser": null
+    },
+    "third": {
+      "id": "3nwf4f7cu8ymtx5afh1",
+      "name": "Third place",
+      "seeds": [
+        "Munson/Oesterheld",
+        "Kaye/Hesselberth"
+      ],
+      "games": [],
+      "winner": null,
+      "loser": null
+    }
+  }
+}
