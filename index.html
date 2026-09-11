@@ -298,7 +298,7 @@ small{
 <body>
 <header>
   <h1 id="title">Tournament Manager</h1>
-  <div id="stage" class="pill">No tournament</div>
+  <div id="stage" class="pill">Loading...</div>
 </header>
 
 <main>
@@ -310,16 +310,17 @@ small{
 "use strict";
 
 const KEY="rr-tournament-v1";
+const DEFAULT_JSON_PATH="./tournament_data.json"; // Name of your JSON file on GitHub Pages
 let data=null;
 let undoStack=[];
 let currentView="home";
 
 const TIE_COLORS=[
-  { bg:"#eff6ff", border:"#bfdbfe", text:"#1e40af", badgeBg:"#dbeafe" }, // Blue
-  { bg:"#fefce8", border:"#fef08a", text:"#854d0e", badgeBg:"#fef9c3" }, // Amber
-  { bg:"#f0fdf4", border:"#bbf7d0", text:"#166534", badgeBg:"#dcfce7" }, // Green
-  { bg:"#faf5ff", border:"#e9d5ff", text:"#6b21a8", badgeBg:"#f3e8ff" }, // Purple
-  { bg:"#fff1f2", border:"#fecdd3", text:"#9f1239", badgeBg:"#ffe4e6" }  // Rose
+  { bg:"#eff6ff", border:"#bfdbfe", text:"#1e40af", badgeBg:"#dbeafe" },
+  { bg:"#fefce8", border:"#fef08a", text:"#854d0e", badgeBg:"#fef9c3" },
+  { bg:"#f0fdf4", border:"#bbf7d0", text:"#166534", badgeBg:"#dcfce7" },
+  { bg:"#faf5ff", border:"#e9d5ff", text:"#6b21a8", badgeBg:"#f3e8ff" },
+  { bg:"#fff1f2", border:"#fecdd3", text:"#9f1239", badgeBg:"#ffe4e6" }
 ];
 
 const $=selector=>document.querySelector(selector);
@@ -336,6 +337,34 @@ const uid=()=>{
   return Math.random().toString(36).slice(2)+Date.now().toString(36);
 };
 
+// Async Initialization sequence for GitHub Pages
+async function init() {
+  try {
+    const saved = localStorage.getItem(KEY);
+    if (saved) {
+      data = JSON.parse(saved);
+    } else {
+      await loadFromDefaultJSON();
+    }
+  } catch (error) {
+    console.warn("Failed loading from local storage, trying JSON file...", error);
+    await loadFromDefaultJSON();
+  }
+  render();
+}
+
+async function loadFromDefaultJSON() {
+  try {
+    const res = await fetch(DEFAULT_JSON_PATH);
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+    data = await res.json();
+    save();
+  } catch (err) {
+    console.warn("Could not load default JSON file:", err);
+    data = null;
+  }
+}
+
 function save(){
   if(data){
     localStorage.setItem(KEY,JSON.stringify(data));
@@ -344,9 +373,7 @@ function save(){
 
 function snapshot(){
   if(!data)return;
-
   undoStack.push(JSON.stringify(data));
-
   if(undoStack.length>50){
     undoStack.shift();
   }
@@ -357,7 +384,6 @@ function undo(){
     alert("Nothing to undo.");
     return;
   }
-
   data=JSON.parse(undoStack.pop());
   save();
   render();
@@ -437,7 +463,6 @@ function makeSchedule(n){
     }
 
     rounds.push(games);
-
     teams.splice(1,0,teams.pop());
   }
 
@@ -497,7 +522,6 @@ function standings(){
     row.pm=row.pf-row.pa;
   });
 
-  // Step 1: Initial sort by Overall Wins
   rows.sort((a,b)=> b.w - a.w || a.order - b.order);
 
   let result=[];
@@ -505,7 +529,6 @@ function standings(){
   for(let i=0; i<rows.length; ){
     let j=i+1;
 
-    // Group teams with identical overall wins
     while(j<rows.length && rows[j].w === rows[i].w){
       j++;
     }
@@ -515,7 +538,6 @@ function standings(){
     if(group.length > 1){
       const groupIds = new Set(group.map(row => row.i));
 
-      // Calculate Head-to-Head stats ONLY among group members
       group.forEach(row => {
         row.hhW = 0;
         row.hhL = 0;
@@ -546,12 +568,6 @@ function standings(){
         }
       });
 
-      // Tiebreaker Hierarchy:
-      // 1) Overall Wins (handled by outer grouping)
-      // 2) Head-to-Head Win-Loss Differential among tied teams
-      // 3) Head-to-Head Point Differential among tied teams
-      // 4) Overall Point Differential
-      // 5) Manual Order
       group.sort((a,b) =>
         (b.hhW - b.hhL) - (a.hhW - a.hhL) ||
         b.hhPM - a.hhPM ||
@@ -710,6 +726,7 @@ function renderHome(){
         </p>
         <button class="primary" onclick="showCreate()">New tournament</button>
         <button onclick="go('data')">Import JSON</button>
+        <button onclick="resetToDefaultJSON()">Reload tournament_data.json</button>
       </div>`;
     return;
   }
@@ -1498,6 +1515,10 @@ function renderData(){
           hidden>
       </label>
 
+      <button onclick="resetToDefaultJSON()">
+        Reload from tournament_data.json
+      </button>
+
       <button onclick="clearLocalStorage()">
         Clear local storage
       </button>
@@ -1554,6 +1575,15 @@ function importJSON(event){
   reader.readAsText(file);
 }
 
+async function resetToDefaultJSON() {
+  if(confirm("Reset local changes and reload data directly from tournament_data.json?")){
+    localStorage.removeItem(KEY);
+    await loadFromDefaultJSON();
+    currentView="home";
+    render();
+  }
+}
+
 function clearLocalStorage(){
   if(confirm("Clear all locally saved tournament data?")){
     localStorage.removeItem(KEY);
@@ -1574,13 +1604,8 @@ function deleteTournament(){
   }
 }
 
-try{
-  data=JSON.parse(localStorage.getItem(KEY) || "null");
-}catch(error){
-  data=null;
-}
-
-render();
+// Start application initialization
+window.addEventListener("DOMContentLoaded", init);
 </script>
 </body>
 </html>
