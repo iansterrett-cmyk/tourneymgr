@@ -302,6 +302,34 @@
       border-radius: 12px;
       border: 1px solid var(--border);
     }
+
+    .bracket {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      margin-top: 1rem;
+    }
+
+    @media (min-width: 640px) {
+      .bracket {
+        flex-direction: row;
+        align-items: stretch;
+      }
+      .bracket-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+      }
+    }
+
+    .matchup {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -422,6 +450,7 @@
         <button class="${currentView === 'home' ? 'active' : ''}" onclick="go('home')">Home</button>
         <button class="${currentView === 'schedule' ? 'active' : ''}" onclick="go('schedule')">Schedule</button>
         <button class="${currentView === 'standings' ? 'active' : ''}" onclick="go('standings')">Standings</button>
+        <button class="${currentView === 'finals' ? 'active' : ''}" onclick="go('finals')">Finals</button>
         <button class="${currentView === 'data' ? 'active' : ''}" onclick="go('data')">Data / Import</button>
       `;
 
@@ -448,6 +477,47 @@
         game.awayScore = null;
         save();
       }
+    }
+
+    function saveFinalsScore(matchKey) {
+      if (!data.finals) return;
+      const homeVal = $(`#final-home-${matchKey}`).value.trim();
+      const awayVal = $(`#final-away-${matchKey}`).value.trim();
+
+      const match = data.finals[matchKey];
+      if (match) {
+        match.homeScore = homeVal !== "" && !isNaN(homeVal) ? parseInt(homeVal, 10) : null;
+        match.awayScore = awayVal !== "" && !isNaN(awayVal) ? parseInt(awayVal, 10) : null;
+
+        // Auto advance to championship if semifinals complete
+        if (matchKey === "semi1" || matchKey === "semi2") {
+          updateChampionshipMatchup();
+        }
+
+        save();
+      }
+    }
+
+    function updateChampionshipMatchup() {
+      if (!data.finals || !data.finals.semi1 || !data.finals.semi2) return;
+      
+      let winner1 = null;
+      let winner2 = null;
+
+      if (data.finals.semi1.homeScore !== null && data.finals.semi1.awayScore !== null) {
+        winner1 = data.finals.semi1.homeScore > data.finals.semi1.awayScore ? data.finals.semi1.home : data.finals.semi1.away;
+      }
+
+      if (data.finals.semi2.homeScore !== null && data.finals.semi2.awayScore !== null) {
+        winner2 = data.finals.semi2.homeScore > data.finals.semi2.awayScore ? data.finals.semi2.home : data.finals.semi2.away;
+      }
+
+      if (!data.finals.champ) {
+        data.finals.champ = { home: null, away: null, homeScore: null, awayScore: null };
+      }
+
+      data.finals.champ.home = winner1;
+      data.finals.champ.away = winner2;
     }
 
     function renderHome() {
@@ -492,6 +562,7 @@
                 Mark round robin complete
               </button>
             </div>
+            ${data.roundRobinComplete ? `<div class="actions"><button onclick="go('finals')">Go to Finals Bracket</button></div>` : ''}
           </div>
         </div>`;
     }
@@ -535,7 +606,7 @@
         }
       }
 
-      data = { name, teams, games, roundRobinComplete: false };
+      data = { name, teams, games, roundRobinComplete: false, finals: null };
       save();
       go("schedule");
     }
@@ -545,9 +616,46 @@
       return data.games.every(function(g) { return g.homeScore !== null && g.awayScore !== null; });
     }
 
+    function calculateStandings() {
+      if (!data || !data.teams || !data.games) return [];
+      const stats = {};
+      data.teams.forEach(function(t) {
+        stats[t] = { team: t, played: 0, wins: 0, losses: 0, ties: 0, points: 0 };
+      });
+
+      data.games.forEach(function(g) {
+        if (g.homeScore !== null && g.awayScore !== null) {
+          if (stats[g.home]) stats[g.home].played++;
+          if (stats[g.away]) stats[g.away].played++;
+
+          if (g.homeScore > g.awayScore) {
+            if (stats[g.home]) { stats[g.home].wins++; stats[g.home].points += 3; }
+            if (stats[g.away]) { stats[g.away].losses++; }
+          } else if (g.awayScore > g.homeScore) {
+            if (stats[g.away]) { stats[g.away].wins++; stats[g.away].points += 3; }
+            if (stats[g.home]) { stats[g.home].losses++; }
+          } else {
+            if (stats[g.home]) { stats[g.home].ties++; stats[g.home].points += 1; }
+            if (stats[g.away]) { stats[g.away].ties++; stats[g.away].points += 1; }
+          }
+        }
+      });
+
+      return Object.values(stats).sort(function(a, b) { return b.points - a.points; });
+    }
+
     function completeRR() {
       if (!data) return;
       data.roundRobinComplete = true;
+
+      const standings = calculateStandings();
+      if (standings.length >= 4) {
+        data.finals = {
+          semi1: { home: standings[0].team, away: standings[3].team, homeScore: null, awayScore: null },
+          semi2: { home: standings[1].team, away: standings[2].team, homeScore: null, awayScore: null },
+          champ: { home: null, away: null, homeScore: null, awayScore: null }
+        };
+      }
       save();
     }
 
@@ -634,30 +742,7 @@
         return;
       }
 
-      const stats = {};
-      data.teams.forEach(function(t) {
-        stats[t] = { played: 0, wins: 0, losses: 0, ties: 0, points: 0 };
-      });
-
-      data.games.forEach(function(g) {
-        if (g.homeScore !== null && g.awayScore !== null) {
-          if (stats[g.home]) stats[g.home].played++;
-          if (stats[g.away]) stats[g.away].played++;
-
-          if (g.homeScore > g.awayScore) {
-            if (stats[g.home]) { stats[g.home].wins++; stats[g.home].points += 3; }
-            if (stats[g.away]) { stats[g.away].losses++; }
-          } else if (g.awayScore > g.homeScore) {
-            if (stats[g.away]) { stats[g.away].wins++; stats[g.away].points += 3; }
-            if (stats[g.home]) { stats[g.home].losses++; }
-          } else {
-            if (stats[g.home]) { stats[g.home].ties++; stats[g.home].points += 1; }
-            if (stats[g.away]) { stats[g.away].ties++; stats[g.away].points += 1; }
-          }
-        }
-      });
-
-      const sorted = Object.keys(stats).sort(function(a, b) { return stats[b].points - stats[a].points; });
+      const sorted = calculateStandings();
 
       let html = `
         <div class="card">
@@ -676,11 +761,10 @@
               </thead>
               <tbody>`;
 
-      sorted.forEach(function(team) {
-        const s = stats[team];
+      sorted.forEach(function(s) {
         html += `
           <tr>
-            <td><strong>${esc(team)}</strong></td>
+            <td><strong>${esc(s.team)}</strong></td>
             <td>${s.played}</td>
             <td>${s.wins}</td>
             <td>${s.ties}</td>
@@ -691,6 +775,84 @@
 
       html += '</tbody></table></div></div>';
       $("#view").innerHTML = html;
+    }
+
+    function renderFinals() {
+      if (!data || !data.roundRobinComplete) {
+        $("#view").innerHTML = `
+          <div class="card">
+            <h2>Finals Bracket</h2>
+            <p class="muted">The finals playoff bracket unlocks after marking the round-robin stage complete.</p>
+            <div class="actions">
+              <button class="primary" onclick="go('home')">Go to Home</button>
+            </div>
+          </div>`;
+        return;
+      }
+
+      if (!data.finals) {
+        completeRR();
+      }
+
+      const f = data.finals || {};
+      const semi1 = f.semi1 || {};
+      const semi2 = f.semi2 || {};
+      const champ = f.champ || {};
+
+      $("#view").innerHTML = `
+        <div class="card">
+          <h2>4-Team Playoff Bracket</h2>
+          <div class="bracket">
+            <div class="bracket-column">
+              <h3>Semifinals</h3>
+              
+              <!-- Semi 1 -->
+              <div class="matchup">
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.4rem;">Seed #1 vs Seed #4</p>
+                <div class="game-row" style="border-bottom:none; padding:0;">
+                  <span>${esc(semi1.home || 'TBD')} vs ${esc(semi1.away || 'TBD')}</span>
+                  <div class="score-controls">
+                    <input type="number" id="final-home-semi1" class="score-input" value="${semi1.homeScore ?? ''}" placeholder="-">
+                    <span>:</span>
+                    <input type="number" id="final-away-semi1" class="score-input" value="${semi2.awayScore ?? ''}" placeholder="-">
+                    <button class="primary btn-sm" onclick="saveFinalsScore('semi1')">Save</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Semi 2 -->
+              <div class="matchup">
+                <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.4rem;">Seed #2 vs Seed #3</p>
+                <div class="game-row" style="border-bottom:none; padding:0;">
+                  <span>${esc(semi2.home || 'TBD')} vs ${esc(semi2.away || 'TBD')}</span>
+                  <div class="score-controls">
+                    <input type="number" id="final-home-semi2" class="score-input" value="${semi2.homeScore ?? ''}" placeholder="-">
+                    <span>:</span>
+                    <input type="number" id="final-away-semi2" class="score-input" value="${semi2.awayScore ?? ''}" placeholder="-">
+                    <button class="primary btn-sm" onclick="saveFinalsScore('semi2')">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="bracket-column">
+              <h3>Championship</h3>
+              <div class="matchup" style="border-color: var(--primary);">
+                <p style="font-size:0.85rem; color:var(--primary); margin-bottom:0.4rem; font-weight:bold;">Finals Match</p>
+                <div class="game-row" style="border-bottom:none; padding:0;">
+                  <span>${esc(champ.home || 'TBD')} vs ${esc(champ.away || 'TBD')}</span>
+                  <div class="score-controls">
+                    <input type="number" id="final-home-champ" class="score-input" value="${champ.homeScore ?? ''}" placeholder="-">
+                    <span>:</span>
+                    <input type="number" id="final-away-champ" class="score-input" value="${champ.awayScore ?? ''}" placeholder="-">
+                    <button class="primary btn-sm" onclick="saveFinalsScore('champ')">Save</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function renderDataView() {
@@ -726,6 +888,7 @@
       if (currentView === "home") renderHome();
       else if (currentView === "schedule") renderSchedule();
       else if (currentView === "standings") renderStandings();
+      else if (currentView === "finals") renderFinals();
       else if (currentView === "data") renderDataView();
     }
 
