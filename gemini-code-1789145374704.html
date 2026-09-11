@@ -1,0 +1,1586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tournament Manager</title>
+
+<style>
+:root{
+  --bg:#f5f6f8;
+  --card:#fff;
+  --ink:#17202a;
+  --muted:#68727d;
+  --line:#dfe3e8;
+  --accent:#2457d6;
+  --danger:#b42318;
+  --ok:#16794c;
+}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font:15px system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+header{
+  background:#182230;
+  color:#fff;
+  padding:18px 24px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+}
+
+header h1{
+  margin:0;
+  font-size:20px;
+}
+
+main{
+  max-width:1200px;
+  margin:auto;
+  padding:22px;
+}
+
+nav{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-bottom:18px;
+}
+
+button,
+.button{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:7px;
+  padding:9px 13px;
+  cursor:pointer;
+  font:inherit;
+}
+
+button:hover,
+.button:hover{
+  border-color:var(--accent);
+}
+
+button.primary{
+  background:var(--accent);
+  border-color:var(--accent);
+  color:#fff;
+}
+
+button.danger{
+  color:var(--danger);
+}
+
+button:disabled{
+  opacity:.45;
+  cursor:not-allowed;
+}
+
+nav button.active{
+  background:var(--ink);
+  color:#fff;
+}
+
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  border-radius:10px;
+  padding:18px;
+  margin-bottom:18px;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:16px;
+}
+
+label{
+  display:block;
+  font-weight:600;
+  margin-bottom:12px;
+}
+
+input,
+select{
+  width:100%;
+  padding:9px;
+  border:1px solid #bdc5ce;
+  border-radius:6px;
+  font:inherit;
+  margin-top:5px;
+}
+
+input:disabled{
+  background:#eef0f3;
+  color:#5e6670;
+}
+
+h2,
+h3{
+  margin-top:0;
+}
+
+.muted{
+  color:var(--muted);
+}
+
+.error{
+  color:var(--danger);
+}
+
+.success{
+  color:var(--ok);
+}
+
+.actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-top:12px;
+}
+
+.scroll{
+  overflow:auto;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+}
+
+th,
+td{
+  padding:9px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  white-space:nowrap;
+}
+
+th{
+  background:#f0f2f5;
+}
+
+.center{
+  text-align:center;
+}
+
+.pill{
+  display:inline-block;
+  border-radius:99px;
+  padding:4px 9px;
+  background:#edf1f7;
+  font-size:12px;
+}
+
+.game{
+  display:grid;
+  grid-template-columns:1fr 70px 20px 70px 1fr auto;
+  gap:8px;
+  align-items:center;
+  border-bottom:1px solid var(--line);
+  padding:10px 0;
+}
+
+.game input{
+  margin:0;
+  text-align:center;
+}
+
+.game .away{
+  text-align:right;
+}
+
+.series{
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:14px;
+  margin:12px 0;
+}
+
+.series h3{
+  margin-bottom:10px;
+}
+
+.series small{
+  color:var(--muted);
+  font-weight:normal;
+}
+
+.h2h-table th,
+.h2h-table td{
+  text-align:center;
+  min-width:92px;
+}
+
+.h2h-table th:first-child,
+.h2h-table td:first-child{
+  text-align:left;
+  min-width:160px;
+  position:sticky;
+  left:0;
+  background:#fff;
+}
+
+.h2h-table th:first-child{
+  background:#f0f2f5;
+}
+
+.h2h-cell{
+  font-size:12px;
+  line-height:1.35;
+}
+
+.h2h-cell strong{
+  display:block;
+  font-size:13px;
+}
+
+.h2h-cell span{
+  color:var(--muted);
+}
+
+.tie-legend{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+  margin-bottom:12px;
+}
+
+.tie-badge{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding:4px 10px;
+  border-radius:6px;
+  font-size:12px;
+  font-weight:600;
+  border:1px solid transparent;
+}
+
+small{
+  color:var(--muted);
+}
+
+.hidden{
+  display:none!important;
+}
+
+@media(max-width:650px){
+  main{
+    padding:12px;
+  }
+
+  .game{
+    grid-template-columns:1fr 52px 12px 52px auto;
+  }
+
+  .game > div:nth-child(5){
+    display:none;
+  }
+
+  .game > button{
+    grid-column:1 / -1;
+  }
+}
+</style>
+</head>
+
+<body>
+<header>
+  <h1 id="title">Tournament Manager</h1>
+  <div id="stage" class="pill">No tournament</div>
+</header>
+
+<main>
+  <nav id="nav"></nav>
+  <section id="view"></section>
+</main>
+
+<script>
+"use strict";
+
+const KEY="rr-tournament-v1";
+let data=null;
+let undoStack=[];
+let currentView="home";
+
+const TIE_COLORS=[
+  { bg:"#eff6ff", border:"#bfdbfe", text:"#1e40af", badgeBg:"#dbeafe" }, // Blue
+  { bg:"#fefce8", border:"#fef08a", text:"#854d0e", badgeBg:"#fef9c3" }, // Amber
+  { bg:"#f0fdf4", border:"#bbf7d0", text:"#166534", badgeBg:"#dcfce7" }, // Green
+  { bg:"#faf5ff", border:"#e9d5ff", text:"#6b21a8", badgeBg:"#f3e8ff" }, // Purple
+  { bg:"#fff1f2", border:"#fecdd3", text:"#9f1239", badgeBg:"#ffe4e6" }  // Rose
+];
+
+const $=selector=>document.querySelector(selector);
+
+const esc=value=>String(value ?? "").replace(/[&<>"']/g,char=>({
+  "&":"&amp;",
+  "<":"&lt;",
+  ">":"&gt;",
+  '"':"&quot;",
+  "'":"&#39;"
+}[char]));
+
+const uid=()=>{
+  return Math.random().toString(36).slice(2)+Date.now().toString(36);
+};
+
+function save(){
+  if(data){
+    localStorage.setItem(KEY,JSON.stringify(data));
+  }
+}
+
+function snapshot(){
+  if(!data)return;
+
+  undoStack.push(JSON.stringify(data));
+
+  if(undoStack.length>50){
+    undoStack.shift();
+  }
+}
+
+function undo(){
+  if(!undoStack.length){
+    alert("Nothing to undo.");
+    return;
+  }
+
+  data=JSON.parse(undoStack.pop());
+  save();
+  render();
+}
+
+function touch(){
+  if(data){
+    data.meta.updated=new Date().toISOString();
+  }
+}
+
+function commit(){
+  touch();
+  save();
+  render();
+}
+
+function teamName(index){
+  return data.teams[index]?.name || "Unknown";
+}
+
+function newData(name,names){
+  return {
+    meta:{
+      schema:1,
+      created:new Date().toISOString(),
+      updated:new Date().toISOString()
+    },
+    id:uid(),
+    name,
+    stage:"roundrobin",
+    roundRobinComplete:false,
+    teams:names.map(name=>({
+      id:uid(),
+      name:name.trim(),
+      order:0
+    })),
+    games:makeSchedule(names.length),
+    finals:null
+  };
+}
+
+function makeSchedule(n){
+  const teams=[...Array(n).keys()];
+
+  if(n%2){
+    teams.push(null);
+  }
+
+  const rounds=[];
+  const roundCount=teams.length-1;
+  const half=teams.length/2;
+
+  for(let round=0;round<roundCount;round++){
+    const games=[];
+
+    for(let i=0;i<half;i++){
+      let home=teams[i];
+      let away=teams[teams.length-1-i];
+
+      if(home===null || away===null){
+        continue;
+      }
+
+      if((round+i)%2){
+        [home,away]=[away,home];
+      }
+
+      games.push({
+        id:uid(),
+        round:round+1,
+        home,
+        away,
+        homeScore:null,
+        awayScore:null
+      });
+    }
+
+    rounds.push(games);
+
+    teams.splice(1,0,teams.pop());
+  }
+
+  return rounds.flat();
+}
+
+function allRRComplete(){
+  return data.games.every(game=>
+    game.homeScore!==null &&
+    game.awayScore!==null
+  );
+}
+
+function standings(){
+  const rows=data.teams.map((team,index)=>({
+    i:index,
+    id:team.id,
+    name:team.name,
+    gp:0,
+    w:0,
+    l:0,
+    pf:0,
+    pa:0,
+    pm:0,
+    order:team.order ?? index
+  }));
+
+  for(const game of data.games){
+    if(game.homeScore===null || game.awayScore===null){
+      continue;
+    }
+
+    const home=rows[game.home];
+    const away=rows[game.away];
+    const hs=Number(game.homeScore);
+    const as=Number(game.awayScore);
+
+    home.gp++;
+    away.gp++;
+
+    home.pf+=hs;
+    home.pa+=as;
+
+    away.pf+=as;
+    away.pa+=hs;
+
+    if(hs>as){
+      home.w++;
+      away.l++;
+    }else{
+      away.w++;
+      home.l++;
+    }
+  }
+
+  rows.forEach(row=>{
+    row.pm=row.pf-row.pa;
+  });
+
+  // Step 1: Initial sort by Overall Wins
+  rows.sort((a,b)=> b.w - a.w || a.order - b.order);
+
+  let result=[];
+
+  for(let i=0; i<rows.length; ){
+    let j=i+1;
+
+    // Group teams with identical overall wins
+    while(j<rows.length && rows[j].w === rows[i].w){
+      j++;
+    }
+
+    const group=rows.slice(i,j);
+
+    if(group.length > 1){
+      const groupIds = new Set(group.map(row => row.i));
+
+      // Calculate Head-to-Head stats ONLY among group members
+      group.forEach(row => {
+        row.hhW = 0;
+        row.hhL = 0;
+        row.hhPM = 0;
+
+        for(const game of data.games){
+          if(
+            game.homeScore === null ||
+            game.awayScore === null ||
+            !groupIds.has(game.home) ||
+            !groupIds.has(game.away)
+          ){
+            continue;
+          }
+
+          const hs = Number(game.homeScore);
+          const as = Number(game.awayScore);
+
+          if(game.home === row.i){
+            row.hhPM += hs - as;
+            if(hs > as) row.hhW++;
+            else row.hhL++;
+          } else if(game.away === row.i){
+            row.hhPM += as - hs;
+            if(as > hs) row.hhW++;
+            else row.hhL++;
+          }
+        }
+      });
+
+      // Tiebreaker Hierarchy:
+      // 1) Overall Wins (handled by outer grouping)
+      // 2) Head-to-Head Win-Loss Differential among tied teams
+      // 3) Head-to-Head Point Differential among tied teams
+      // 4) Overall Point Differential
+      // 5) Manual Order
+      group.sort((a,b) =>
+        (b.hhW - b.hhL) - (a.hhW - a.hhL) ||
+        b.hhPM - a.hhPM ||
+        b.pm - a.pm ||
+        a.order - b.order
+      );
+    }
+
+    result.push(...group);
+    i=j;
+  }
+
+  return result;
+}
+
+function getTiedGroups(teams){
+  const groups=[];
+  let colorIndex=0;
+
+  for(let i=0;i<teams.length;){
+    let j=i+1;
+
+    while(j<teams.length && teams[j].w===teams[i].w){
+      j++;
+    }
+
+    if(j-i>1){
+      const groupTeams=teams.slice(i,j);
+      const palette=TIE_COLORS[colorIndex % TIE_COLORS.length];
+
+      groups.push({
+        wins:teams[i].w,
+        teamIndices:groupTeams.map(t=>t.i),
+        teamNames:groupTeams.map(t=>t.name),
+        style:palette
+      });
+
+      colorIndex++;
+    }
+
+    i=j;
+  }
+
+  return groups;
+}
+
+function headToHead(homeIndex,awayIndex){
+  let homeW=0;
+  let awayW=0;
+  let differential=0;
+
+  for(const game of data.games){
+    if(
+      game.homeScore===null ||
+      game.awayScore===null
+    ){
+      continue;
+    }
+
+    const hs=Number(game.homeScore);
+    const as=Number(game.awayScore);
+
+    if(game.home===homeIndex && game.away===awayIndex){
+      differential+=hs-as;
+
+      if(hs>as)homeW++;
+      else awayW++;
+    }
+
+    if(game.home===awayIndex && game.away===homeIndex){
+      differential+=as-hs;
+
+      if(as>hs)homeW++;
+      else awayW++;
+    }
+  }
+
+  return {
+    homeW,
+    awayW,
+    differential
+  };
+}
+
+function render(){
+  $("#title").textContent=data ? data.name : "Tournament Manager";
+
+  $("#stage").textContent=data
+    ? data.roundRobinComplete ? "Finals stage" : "Round-robin stage"
+    : "No tournament";
+
+  nav();
+
+  if(!data){
+    renderHome();
+    return;
+  }
+
+  const views={
+    home:renderHome,
+    setup:renderSetup,
+    schedule:renderSchedule,
+    standings:renderStandings,
+    finals:renderFinals,
+    data:renderData
+  };
+
+  (views[currentView] || renderHome)();
+}
+
+function nav(){
+  if(!data){
+    $("#nav").innerHTML="";
+    return;
+  }
+
+  const links=[
+    ["home","Overview"],
+    ["setup","Teams"],
+    ["schedule","Schedule"],
+    ["standings","Standings"],
+    ["finals","Finals"],
+    ["data","Import / Export"]
+  ];
+
+  $("#nav").innerHTML=
+    links.map(([view,label])=>
+      `<button class="${currentView===view?"active":""}"
+        onclick="go('${view}')">${label}</button>`
+    ).join("")+
+    `<button onclick="undo()" ${undoStack.length?"":"disabled"}>Undo</button>
+     <button onclick="startNewTournament()">New tournament</button>
+     <button class="danger" onclick="deleteTournament()">Delete</button>`;
+}
+
+function go(view){
+  currentView=view;
+  render();
+}
+
+function startNewTournament(){
+  if(confirm(
+    "Start a new tournament? The current tournament will remain saved in this browser."
+  )){
+    showCreate();
+  }
+}
+
+function renderHome(){
+  if(!data){
+    $("#view").innerHTML=`
+      <div class="card">
+        <h2>Create a tournament</h2>
+        <p class="muted">
+          Manage a complete round-robin tournament and four-team finals bracket in your browser.
+        </p>
+        <button class="primary" onclick="showCreate()">New tournament</button>
+        <button onclick="go('data')">Import JSON</button>
+      </div>`;
+    return;
+  }
+
+  const completed=data.games.filter(game=>
+    game.homeScore!==null
+  ).length;
+
+  $("#view").innerHTML=`
+    <div class="grid">
+      <div class="card">
+        <h2>${esc(data.name)}</h2>
+        <p>${data.teams.length} teams · ${data.games.length} games</p>
+        <p>${completed}/${data.games.length} round-robin games completed.</p>
+
+        <div class="actions">
+          <button class="primary" onclick="go('schedule')">
+            Enter scores
+          </button>
+          <button onclick="go('standings')">
+            View standings
+          </button>
+          <button onclick="startNewTournament()">
+            New tournament
+          </button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Round-robin stage</h3>
+        <p>${data.roundRobinComplete?"Completed":"In progress"}</p>
+
+        <button
+          class="primary"
+          onclick="completeRR()"
+          ${data.roundRobinComplete || !allRRComplete()?"disabled":""}>
+          Mark round robin complete
+        </button>
+
+        ${
+          !allRRComplete()
+            ? `<br><small>Complete every scheduled game before closing this stage.</small>`
+            : ""
+        }
+      </div>
+    </div>`;
+}
+
+function showCreate(){
+  $("#view").innerHTML=`
+    <div class="card">
+      <h2>New tournament</h2>
+
+      <form onsubmit="create(event)">
+        <label>
+          Tournament name
+          <input id="tn" required maxlength="100">
+        </label>
+
+        <label>
+          Number of teams
+          <select id="tc" onchange="teamInputs()">
+            ${Array.from({length:29},(_,i)=>
+              `<option>${i+4}</option>`
+            ).join("")}
+          </select>
+        </label>
+
+        <div id="teamInputs"></div>
+
+        <button class="primary">Create tournament</button>
+        ${
+          data
+            ? `<button type="button" onclick="render()">Cancel</button>`
+            : ""
+        }
+      </form>
+    </div>`;
+
+  teamInputs();
+}
+
+function teamInputs(){
+  const count=Number($("#tc").value);
+
+  $("#teamInputs").innerHTML=
+    Array.from({length:count},(_,i)=>`
+      <label>
+        Team ${i+1}
+        <input
+          class="teamInput"
+          required
+          maxlength="60"
+          value="Team ${i+1}">
+      </label>
+    `).join("");
+}
+
+function create(event){
+  event.preventDefault();
+
+  const names=[
+    ...document.querySelectorAll(".teamInput")
+  ].map(input=>input.value.trim());
+
+  const normalized=names.map(name=>name.toLowerCase());
+
+  if(new Set(normalized).size!==names.length){
+    alert("Team names must be unique.");
+    return;
+  }
+
+  if(data){
+    snapshot();
+  }
+
+  data=newData($("#tn").value.trim(),names);
+  currentView="home";
+  commit();
+}
+
+function renderSetup(){
+  $("#view").innerHTML=`
+    <div class="card">
+      <h2>Teams</h2>
+      <p class="muted">
+        Teams cannot be added or removed after the schedule is created.
+      </p>
+
+      ${data.teams.map((team,index)=>`
+        <label>
+          Team ${index+1}
+          <input
+            id="team${index}"
+            value="${esc(team.name)}"
+            maxlength="60">
+        </label>
+      `).join("")}
+
+      <button class="primary" onclick="saveTeams()">
+        Save names
+      </button>
+    </div>`;
+}
+
+function saveTeams(){
+  const names=data.teams.map((team,index)=>
+    $("#team"+index).value.trim()
+  );
+
+  if(
+    names.some(name=>!name) ||
+    new Set(names.map(name=>name.toLowerCase())).size!==names.length
+  ){
+    alert("Team names must be present and unique.");
+    return;
+  }
+
+  snapshot();
+
+  data.teams.forEach((team,index)=>{
+    team.name=names[index];
+  });
+
+  commit();
+}
+
+function renderSchedule(){
+  const rounds=Math.max(...data.games.map(game=>game.round));
+
+  let html=`
+    <div class="card">
+      <h2>Schedule</h2>
+      <p class="muted">
+        Scores must be non-negative whole numbers and cannot be tied.
+      </p>`;
+
+  for(let round=1;round<=rounds;round++){
+    html+=`<h3>Round ${round}</h3>`;
+
+    data.games
+      .filter(game=>game.round===round)
+      .forEach(game=>{
+        const completed=
+          game.homeScore!==null &&
+          game.awayScore!==null;
+
+        html+=`
+          <div class="game">
+            <div class="away">${esc(teamName(game.home))}</div>
+
+            <input
+              type="number"
+              min="0"
+              step="1"
+              id="h${game.id}"
+              value="${game.homeScore ?? ""}"
+              ${completed?"disabled":""}>
+
+            <div class="center">–</div>
+
+            <input
+              type="number"
+              min="0"
+              step="1"
+              id="a${game.id}"
+              value="${game.awayScore ?? ""}"
+              ${completed?"disabled":""}>
+
+            <div>${esc(teamName(game.away))}</div>
+
+            ${
+              completed
+                ? `<button onclick="editGame('${game.id}')">Edit</button>`
+                : `<button onclick="score('${game.id}')">Save</button>`
+            }
+          </div>`;
+      });
+
+  }
+
+  html+=`</div>`;
+  $("#view").innerHTML=html;
+}
+
+function editGame(id){
+  const homeInput=$("#h"+id);
+  const awayInput=$("#a"+id);
+  const row=homeInput.closest(".game");
+  const button=row.querySelector("button");
+
+  homeInput.disabled=false;
+  awayInput.disabled=false;
+
+  button.textContent="Save";
+  button.onclick=()=>score(id);
+
+  homeInput.focus();
+}
+
+function score(id){
+  const game=data.games.find(item=>item.id===id);
+  const home=$("#h"+id).value;
+  const away=$("#a"+id).value;
+
+  if(
+    home==="" ||
+    away==="" ||
+    Number(home)<0 ||
+    Number(away)<0 ||
+    !Number.isInteger(Number(home)) ||
+    !Number.isInteger(Number(away)) ||
+    Number(home)===Number(away)
+  ){
+    alert(
+      "Enter two different, non-negative whole-number scores."
+    );
+    return;
+  }
+
+  snapshot();
+
+  game.homeScore=Number(home);
+  game.awayScore=Number(away);
+
+  commit();
+}
+
+function renderStandings(){
+  const rows=standings();
+  const tiedGroups=getTiedGroups(rows);
+
+  let html=`
+    <div class="card">
+      <h2>Standings</h2>
+
+      <div class="scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Seed</th>
+              <th>Team</th>
+              <th>GP</th>
+              <th>W</th>
+              <th>L</th>
+              <th>PF</th>
+              <th>PA</th>
+              <th>Overall +/-</th>
+              <th>Group H2H W-L</th>
+              <th>Group H2H +/-</th>
+              <th>Manual Order</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            ${rows.map((row,index)=>{
+              const tiedGroup = tiedGroups.find(g => g.teamIndices.includes(row.i));
+              const style = tiedGroup ? `background-color:${tiedGroup.style.bg};` : "";
+              const hasGroupStats = row.hhW !== undefined;
+
+              return `
+                <tr style="${style}">
+                  <td>${index+1}</td>
+                  <td>${esc(row.name)}</td>
+                  <td>${row.gp}</td>
+                  <td>${row.w}</td>
+                  <td>${row.l}</td>
+                  <td>${row.pf}</td>
+                  <td>${row.pa}</td>
+                  <td>${row.pm >= 0 ? "+" : ""}${row.pm}</td>
+                  <td>${hasGroupStats ? `${row.hhW}-${row.hhL}` : "—"}</td>
+                  <td>${hasGroupStats ? `${row.hhPM >= 0 ? "+" : ""}${row.hhPM}` : "—"}</td>
+                  <td>
+                    <input
+                      type="number"
+                      min="1"
+                      value="${row.order+1}"
+                      onchange="manualOrder(${row.i},this.value)">
+                  </td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="muted">
+        <strong>Tiebreaker Priority Order:</strong><br>
+        1. Overall Win-Loss Record<br>
+        2. Head-to-Head Win-Loss Record among tied teams only<br>
+        3. Head-to-Head Point Differential among tied teams only<br>
+        4. Overall Point Differential<br>
+        5. Manual Order Override
+      </p>
+    </div>
+
+    ${renderHeadToHead(rows, tiedGroups)}`;
+
+  $("#view").innerHTML=html;
+}
+
+function renderHeadToHead(teams, tiedGroups){
+  let legendHtml = "";
+
+  if(tiedGroups.length > 0){
+    legendHtml = `
+      <div class="tie-legend">
+        <span style="font-size:13px; font-weight:600; align-self:center;">Tied Record Groups:</span>
+        ${tiedGroups.map((group, idx) => `
+          <div class="tie-badge" style="background:${group.style.badgeBg}; border-color:${group.style.border}; color:${group.style.text};">
+            Group ${idx+1} (${group.wins} Wins): ${group.teamNames.map(n => esc(n)).join(", ")}
+          </div>
+        `).join("")}
+      </div>`;
+  }
+
+  return `
+    <div class="card">
+      <h2>Head-to-head results</h2>
+      <p class="muted">
+        Each cell shows the row team's win-loss record and point differential
+        against the column team. Highlighted cells represent matches between teams tied in overall record.
+      </p>
+
+      ${legendHtml}
+
+      <div class="scroll">
+        <table class="h2h-table">
+          <thead>
+            <tr>
+              <th>Team</th>
+              ${teams.map(team=>`<th>${esc(team.name)}</th>`).join("")}
+            </tr>
+          </thead>
+
+          <tbody>
+            ${teams.map(row=>{
+              return `
+                <tr>
+                  <th>${esc(row.name)}</th>
+
+                  ${teams.map(column=>{
+                    if(row.i===column.i){
+                      return `<td>—</td>`;
+                    }
+
+                    const result=headToHead(row.i,column.i);
+
+                    const tiedGroup = tiedGroups.find(g =>
+                      g.teamIndices.includes(row.i) && g.teamIndices.includes(column.i)
+                    );
+
+                    const cellStyle = tiedGroup
+                      ? `background-color:${tiedGroup.style.bg}; border:2px solid ${tiedGroup.style.border}; border-radius:4px;`
+                      : "";
+
+                    return `
+                      <td class="h2h-cell" style="${cellStyle}">
+                        <strong style="${tiedGroup ? `color:${tiedGroup.style.text}` : ''}">${result.homeW}-${result.awayW}</strong>
+                        <span>${result.differential>=0?"+":""}${result.differential}</span>
+                      </td>`;
+                  }).join("")}
+                </tr>`;
+            }).join("")}
+          </tbody>
+        </table>
+      </div>
+
+      <p>
+        <small>
+          Format: win-loss, followed by point differential.
+          For example, 2-1 (+7) means two wins, one loss, and a seven-point advantage.
+        </small>
+      </p>
+    </div>`;
+}
+
+function manualOrder(index,value){
+  const order=Number(value);
+
+  if(!Number.isInteger(order)||order<1||order>data.teams.length){
+    alert("Manual order must be between 1 and the number of teams.");
+    render();
+    return;
+  }
+
+  snapshot();
+  data.teams[index].order=order-1;
+  commit();
+}
+
+function completeRR(){
+  if(!allRRComplete()){
+    alert("Complete every round-robin game first.");
+    return;
+  }
+
+  snapshot();
+  data.roundRobinComplete=true;
+  data.stage="finals";
+  commit();
+}
+
+function renderFinals(){
+  if(!data.roundRobinComplete){
+    $("#view").innerHTML=`
+      <div class="card">
+        <h2>Finals</h2>
+        <p>
+          Complete all round-robin games, then mark the round-robin stage complete
+          from the Overview page.
+        </p>
+        <button onclick="go('home')">Back to overview</button>
+      </div>`;
+    return;
+  }
+
+  if(!data.finals){
+    renderFinalSetup();
+    return;
+  }
+
+  renderBracket();
+}
+
+function renderFinalSetup(){
+  const rows=standings().slice(0,4);
+
+  $("#view").innerHTML=`
+    <div class="card">
+      <h2>Configure finals</h2>
+      <p class="muted">
+        Select any two distinct seeds for each semifinal.
+        Every top-four seed must be used once.
+      </p>
+
+      <div class="grid">
+        <label>
+          Semifinal 1
+          <select id="f1a">${seedOptions(rows)}</select>
+          <select id="f1b">${seedOptions(rows)}</select>
+        </label>
+
+        <label>
+          Semifinal 2
+          <select id="f2a">${seedOptions(rows)}</select>
+          <select id="f2b">${seedOptions(rows)}</select>
+        </label>
+      </div>
+
+      <button class="primary" onclick="createFinals()">
+        Create finals bracket
+      </button>
+    </div>`;
+}
+
+function seedOptions(rows){
+  return rows.map((row,index)=>
+    `<option value="${index}">
+      Seed ${index+1} — ${esc(row.name)}
+    </option>`
+  ).join("");
+}
+
+function createFinals(){
+  const pairs=[
+    [Number($("#f1a").value),Number($("#f1b").value)],
+    [Number($("#f2a").value),Number($("#f2b").value)]
+  ];
+
+  const used=pairs.flat();
+
+  if(
+    pairs.some(pair=>pair[0]===pair[1]) ||
+    new Set(used).size!==4
+  ){
+    alert(
+      "Each semifinal must contain two different seeds, and every seed must be used once."
+    );
+    return;
+  }
+
+  snapshot();
+
+  data.finals={
+    semis:[
+      newSeries("Semifinal 1",pairs[0]),
+      newSeries("Semifinal 2",pairs[1])
+    ],
+    champ:newSeries("Championship",null),
+    third:newSeries("Third place",null)
+  };
+
+  commit();
+}
+
+function newSeries(name,seeds){
+  return {
+    id:uid(),
+    name,
+    seeds,
+    games:[],
+    winner:null,
+    loser:null
+  };
+}
+
+function seedTeam(seed){
+  return standings()[seed]?.name || "Unknown";
+}
+
+function getSeries(key){
+  if(key==="champ")return data.finals.champ;
+  if(key==="third")return data.finals.third;
+  return data.finals.semis[Number(key[1])];
+}
+
+function renderBracket(){
+  const finals=data.finals;
+
+  let html=`
+    <div class="card">
+      <h2>Finals bracket</h2>
+      <p class="muted">
+        Every series is best-of-three. A series ends automatically after two wins.
+      </p>
+
+      ${seriesHTML(finals.semis[0],"s0")}
+      ${seriesHTML(finals.semis[1],"s1")}
+      ${finals.champ.seeds?seriesHTML(finals.champ,"champ"):""}
+      ${finals.third.seeds?seriesHTML(finals.third,"third"):""}
+    </div>`;
+
+  $("#view").innerHTML=html;
+}
+
+function seriesHTML(series,key){
+  const label=series.seeds
+    ? `${esc(seedTeam(series.seeds[0]))} vs ${esc(seedTeam(series.seeds[1]))}`
+    : "Awaiting semifinal winners";
+
+  const games=series.games.map(game=>{
+    const completed=
+      game.x!==null &&
+      game.y!==null;
+
+    return `
+      <div class="game">
+        <div class="away">${esc(game.a)}</div>
+
+        <input
+          id="x${game.id}"
+          type="number"
+          min="0"
+          step="1"
+          value="${game.x ?? ""}"
+          ${completed?"disabled":""}>
+
+        <div>–</div>
+
+        <input
+          id="y${game.id}"
+          type="number"
+          min="0"
+          step="1"
+          value="${game.y ?? ""}"
+          ${completed?"disabled":""}>
+
+        <div>${esc(game.b)}</div>
+
+        ${
+          completed
+            ? `<button onclick="editSeriesGame('${key}','${game.id}')">Edit</button>`
+            : `<button onclick="seriesScore('${key}','${game.id}')">Save</button>`
+        }
+      </div>`;
+  }).join("");
+
+  return `
+    <div class="series">
+      <h3>
+        ${esc(series.name)}
+        <small>${label}</small>
+      </h3>
+
+      ${games}
+
+      <button
+        onclick="addSeriesGame('${key}')"
+        ${!series.seeds || series.winner?"disabled":""}>
+        Add game
+      </button>
+
+      ${
+        series.winner
+          ? `<p class="success">
+              Winner: ${esc(series.winner)}
+              · Loser: ${esc(series.loser)}
+            </p>`
+          : ""
+      }
+    </div>`;
+}
+
+function editSeriesGame(key,id){
+  const xInput=$("#x"+id);
+  const yInput=$("#y"+id);
+  const row=xInput.closest(".game");
+  const button=row.querySelector("button");
+
+  xInput.disabled=false;
+  yInput.disabled=false;
+
+  button.textContent="Save";
+  button.onclick=()=>seriesScore(key,id);
+
+  xInput.focus();
+}
+
+function addSeriesGame(key){
+  const series=getSeries(key);
+
+  if(!series.seeds || series.winner){
+    return;
+  }
+
+  const a=seedTeam(series.seeds[0]);
+  const b=seedTeam(series.seeds[1]);
+
+  snapshot();
+
+  series.games.push({
+    id:uid(),
+    a,
+    b,
+    x:null,
+    y:null
+  });
+
+  commit();
+}
+
+function seriesScore(key,id){
+  const series=getSeries(key);
+  const game=series.games.find(item=>item.id===id);
+
+  const x=$("#x"+id).value;
+  const y=$("#y"+id).value;
+
+  if(
+    x==="" ||
+    y==="" ||
+    Number(x)<0 ||
+    Number(y)<0 ||
+    !Number.isInteger(Number(x)) ||
+    !Number.isInteger(Number(y)) ||
+    Number(x)===Number(y)
+  ){
+    alert(
+      "Enter two different, non-negative whole-number scores."
+    );
+    return;
+  }
+
+  snapshot();
+
+  game.x=Number(x);
+  game.y=Number(y);
+
+  reevaluateSeries(series);
+  advanceFinals();
+
+  commit();
+}
+
+function reevaluateSeries(series){
+  const winsA=series.games.filter(game=>
+    game.x!==null && game.x>game.y
+  ).length;
+
+  const winsB=series.games.filter(game=>
+    game.x!==null && game.y>game.x
+  ).length;
+
+  if(winsA>=2 || winsB>=2){
+    series.winner=winsA>winsB
+      ? series.games[0].a
+      : series.games[0].b;
+
+    series.loser=winsA>winsB
+      ? series.games[0].b
+      : series.games[0].a;
+  }else{
+    series.winner=null;
+    series.loser=null;
+  }
+}
+
+function advanceFinals(){
+  const finals=data.finals;
+  const first=finals.semis[0];
+  const second=finals.semis[1];
+
+  if(first.winner && second.winner){
+    const winner1Seed = data.teams.findIndex(team=>team.name===first.winner);
+    const winner2Seed = data.teams.findIndex(team=>team.name===second.winner);
+    const loser1Seed = data.teams.findIndex(team=>team.name===first.loser);
+    const loser2Seed = data.teams.findIndex(team=>team.name===second.loser);
+
+    const standingsRows = standings();
+
+    finals.champ.seeds = [
+      standingsRows.findIndex(r => r.i === winner1Seed),
+      standingsRows.findIndex(r => r.i === winner2Seed)
+    ];
+
+    finals.third.seeds = [
+      standingsRows.findIndex(r => r.i === loser1Seed),
+      standingsRows.findIndex(r => r.i === loser2Seed)
+    ];
+  }else{
+    if(finals.champ.games.length===0) finals.champ.seeds=null;
+    if(finals.third.games.length===0) finals.third.seeds=null;
+  }
+}
+
+function renderData(){
+  $("#view").innerHTML=`
+    <div class="card">
+      <h2>Import / Export</h2>
+
+      <p>
+        Tournament data is saved automatically in this browser.
+      </p>
+
+      <button class="primary" onclick="exportJSON()">
+        Export JSON
+      </button>
+
+      <label class="button">
+        Import JSON
+        <input
+          type="file"
+          accept=".json,application/json"
+          onchange="importJSON(event)"
+          hidden>
+      </label>
+
+      <button onclick="clearLocalStorage()">
+        Clear local storage
+      </button>
+    </div>`;
+}
+
+function exportJSON(){
+  if(!data)return;
+
+  const blob=new Blob(
+    [JSON.stringify(data,null,2)],
+    {type:"application/json"}
+  );
+
+  const link=document.createElement("a");
+
+  link.href=URL.createObjectURL(blob);
+  link.download=
+    (data.name.replace(/[^a-z0-9]+/gi,"-") || "tournament")+
+    ".json";
+
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
+
+function importJSON(event){
+  const file=event.target.files[0];
+
+  if(!file)return;
+
+  const reader=new FileReader();
+
+  reader.onload=()=>{
+    try{
+      const imported=JSON.parse(reader.result);
+
+      if(
+        !imported.meta ||
+        !Array.isArray(imported.teams) ||
+        !Array.isArray(imported.games)
+      ){
+        throw new Error("Invalid file");
+      }
+
+      snapshot();
+      data=imported;
+      currentView="home";
+      commit();
+    }catch(error){
+      alert("That file is not a valid tournament JSON file.");
+    }
+  };
+
+  reader.readAsText(file);
+}
+
+function clearLocalStorage(){
+  if(confirm("Clear all locally saved tournament data?")){
+    localStorage.removeItem(KEY);
+    data=null;
+    undoStack=[];
+    currentView="home";
+    render();
+  }
+}
+
+function deleteTournament(){
+  if(confirm("Delete this tournament from this browser?")){
+    snapshot();
+    data=null;
+    localStorage.removeItem(KEY);
+    currentView="home";
+    render();
+  }
+}
+
+try{
+  data=JSON.parse(localStorage.getItem(KEY) || "null");
+}catch(error){
+  data=null;
+}
+
+render();
+</script>
+</body>
+</html>
